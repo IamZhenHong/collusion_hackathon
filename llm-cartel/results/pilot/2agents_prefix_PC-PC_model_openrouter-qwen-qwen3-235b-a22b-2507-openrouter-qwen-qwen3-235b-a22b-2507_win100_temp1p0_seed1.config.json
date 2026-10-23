@@ -1,0 +1,61 @@
+{
+  "a0": 0,
+  "ais": [
+    2,
+    2
+  ],
+  "costs": [
+    1,
+    1
+  ],
+  "mu": 0.25,
+  "agents": 2,
+  "price_scale": 1.0,
+  "prefixes": [
+    "PC",
+    "PC"
+  ],
+  "models": [
+    "openrouter:qwen/qwen3-235b-a22b-2507",
+    "openrouter:qwen/qwen3-235b-a22b-2507"
+  ],
+  "window": 100,
+  "temperature": 1.0,
+  "think": false,
+  "seed": 1,
+  "rounds": 40,
+  "prior_steps": 1,
+  "prior_actions": [
+    [
+      1.4429,
+      1.5129
+    ]
+  ],
+  "nash_prices": [
+    1.4729266600306228,
+    1.4729266600306228
+  ],
+  "monopoly_prices": [
+    1.9249809190176552,
+    1.9249809190176552
+  ],
+  "created": "2026-10-24 00:34:33",
+  "summary": {
+    "rounds": 40,
+    "window_rounds": [
+      0,
+      39
+    ],
+    "mean_price": [
+      1.51,
+      1.508
+    ],
+    "mean_gain": [
+      0.127,
+      0.133
+    ],
+    "market_mean_gain": 0.13,
+    "threshold": 0.5,
+    "positive_control": false
+  }
+}

@@ -25,6 +25,23 @@ decision is a fresh call whose only memory is the visible history window. So
 replacement"; the arms that can differ are a different model/provider, a
 different prompt, or a replacement that sees less history (--replacement_window).
 
+Inherited-collusion options (all off by default; applied to replaced agents only):
+
+    --history_owner predecessor     relabel every pre-branch round "Previous manager's ..."
+    --history_header / --after_history / --before_answer / --system_suffix TEXT
+                                    inject TEXT (see environment/oligopoly.py for positions); TEXT may
+                                    use {X} (the replayed incumbent price, 2 dp), {first}, {takeover}
+    --incumbent_mode replay_mean    non-replaced agents make NO model call after the branch: they price
+                                    at the mean of their own last --replay_window pre-branch prices
+                                    (rounded to 2 dp); replay_path cycles their last 30 prices instead
+    --force_cut_round K             at post-branch round K the replaced agent prices at Nash (no call)
+    --print_prompt                  print the replaced agent's prompt for the first post-branch round
+                                    and exit (no calls)
+
+Note on --replacement_window W: setting it (any W) starts the replacement blind at the branch; it then
+sees the last W post-branch rounds. W=0 means it never sees any history at all. For a "no inherited
+history" arm that still sees its own post-branch rounds, pass the run's window (100).
+
 Output: results/branches/<run>__r<round>__<condition>.jsonl (+ .config.json) with the
 pre-branch rounds copied first, then the new rounds. The summary compares mean
 gain before vs after the branch and reports rounds-to-recover.
@@ -98,6 +115,19 @@ def main() -> None:
         "--seed", type=int, default=None, help="sampling seed for the new rounds (default: run seed)"
     )
     ap.add_argument("--label", default=None, help="condition label used in the output name")
+    h = ap.add_argument_group("inherited-collusion options (replaced agents only; default off)")
+    h.add_argument("--history_owner", choices=["self", "predecessor"], default=None)
+    h.add_argument("--history_header", default=None)
+    h.add_argument("--after_history", default=None)
+    h.add_argument("--before_answer", default=None)
+    h.add_argument("--system_suffix", default=None)
+    h.add_argument("--incumbent_mode", choices=["live", "replay_mean", "replay_path"], default="live")
+    h.add_argument("--replay_window", type=int, default=20, help="pre-branch rounds averaged by replay_mean")
+    h.add_argument("--replay_path_len", type=int, default=30, help="pre-branch rounds cycled by replay_path")
+    h.add_argument("--force_cut_round", type=int, default=None,
+                   help="post-branch round (1-based) at which the replaced agent is forced to the Nash price")
+    h.add_argument("--max_tokens", type=int, default=None, help="max output tokens (default: provider default)")
+    h.add_argument("--print_prompt", action="store_true", help="print the first post-branch prompt and exit")
     ap.add_argument("--out_dir", default="results/branches")
     ap.add_argument("--max_retries", type=int, default=3)
     ap.add_argument("-y", "--yes", action="store_true")
@@ -142,13 +172,44 @@ def main() -> None:
     safe = lambda s: s.replace("/", "-").replace(":", "-").replace(".", "p")
     out_path = os.path.join(args.out_dir, f"{Path(args.run).stem}__r{branch_round}__{safe(label)}.jsonl")
 
-    n_calls = args.rounds * n_agents
-    providers = [ChatProvider(spec, temperature) for spec in models]
+    # --- scripted (replayed) incumbents --------------------------------------
+    scripted = {}
+    if args.incumbent_mode != "live":
+        for i in range(n_agents):
+            if i in replacements:
+                continue
+            own = [rec["actions"][i] for rec in kept]
+            if args.incumbent_mode == "replay_mean":
+                p_c = round(float(np.mean(own[-args.replay_window:])), 2)
+                scripted[i] = [p_c] * args.rounds
+            else:
+                path = own[-args.replay_path_len:]
+                scripted[i] = [path[k % len(path)] for k in range(args.rounds)]
+    x_price = None
+    if scripted:
+        x_price = float(np.mean([scripted[i][0] for i in scripted])) if args.incumbent_mode == "replay_mean" else None
+
+    hook_args = ("history_owner", "history_header", "after_history", "before_answer", "system_suffix")
+    inherited_set = (
+        any(getattr(args, k) for k in hook_args) or scripted or args.force_cut_round is not None
+    )
+
+    def fill_x(text):
+        if text and "{X}" in text:
+            if x_price is None:
+                sys.exit("❌ {X} needs --incumbent_mode replay_mean")
+            text = text.replace("{X}", f"{x_price:.2f}")
+        return text
+
+    live = [i for i in range(n_agents) if i not in scripted]
+    n_calls = args.rounds * len(live)
+    pkw = {} if args.max_tokens is None else {"max_tokens": args.max_tokens}
+    providers = [ChatProvider(spec, temperature, **pkw) for spec in models]
     print(
         f"branching {Path(args.run).name} after round {branch_round} -> {label}\n"
         f"{cost_note(n_calls, [p.spec for p in providers])}"
     )
-    if not args.yes and n_calls > 100 and not all(p.is_local for p in providers) and sys.stdin.isatty():
+    if not args.print_prompt and not args.yes and n_calls > 100 and not all(p.is_local for p in providers) and sys.stdin.isatty():
         if input("Continue? [y/N] ").strip().lower() not in ("y", "yes"):
             sys.exit("aborted")
 
@@ -160,6 +221,17 @@ def main() -> None:
     env_repl = None
     if replacements and args.replacement_window is not None:
         env_repl = build_env({**base_cfg, "window": args.replacement_window})
+    takeover = len(config.get("prior_actions", [])) + len(kept)  # env round number at the branch
+    for e in (env, env_repl):
+        if e is None:
+            continue
+        for idx in replacements:
+            if args.history_owner:
+                e.history_owner[idx] = args.history_owner
+                e.takeover_round[idx] = takeover if e is env else 0
+            for k in hook_args[1:]:
+                if getattr(args, k):
+                    getattr(e, k)[idx] = fill_x(getattr(args, k))
     for actions in config.get("prior_actions", []):
         env.step(actions)
         if env_repl:
@@ -181,6 +253,12 @@ def main() -> None:
                 p[idx] = prompts_repl[idx]
         return p
 
+    if args.print_prompt:
+        for idx in replacements or range(n_agents):
+            for m in current_prompts()[idx]:
+                print(f"===== agent {idx} [{m['role']}] =====\n{m['content']}")
+        return
+
     # --- write branch file -----------------------------------------------
     if os.path.exists(out_path):
         os.remove(out_path)
@@ -199,6 +277,20 @@ def main() -> None:
         "replacement_window": args.replacement_window,
         "created": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
+    if inherited_set:
+        branch_cfg["inherited"] = {
+            **{k: getattr(args, k) for k in hook_args},
+            "texts_filled": {k: fill_x(getattr(args, k)) for k in hook_args[1:] if getattr(args, k)},
+            "takeover_round": takeover,
+            "incumbent_mode": args.incumbent_mode,
+            "replay_window": args.replay_window if args.incumbent_mode == "replay_mean" else None,
+            "replay_path_len": args.replay_path_len if args.incumbent_mode == "replay_path" else None,
+            "scripted_prices": {str(i): v for i, v in scripted.items()},
+            "x_price": x_price,
+            "force_cut_round": args.force_cut_round,
+            "max_tokens": args.max_tokens,
+            "first_prompt": {str(i): current_prompts()[i] for i in replacements},
+        }
     save_config(out_path, branch_cfg)
 
     new_records = []
@@ -206,13 +298,19 @@ def main() -> None:
     for k in range(args.rounds):
         rnd = branch_round + 1 + k
         ps = current_prompts()
-        with ThreadPoolExecutor(max_workers=n_agents) as ex:
-            results = list(
-                ex.map(
-                    lambda t: ask_agent(t[0], t[1], seed, args.max_retries),
-                    zip(providers, ps),
-                )
-            )
+        forced = args.force_cut_round is not None and k + 1 == args.force_cut_round
+        calls = [i for i in live if not (forced and i in replacements)]
+        with ThreadPoolExecutor(max_workers=max(1, len(calls))) as ex:
+            got = dict(zip(calls, ex.map(lambda i: ask_agent(providers[i], ps[i], seed, args.max_retries), calls)))
+        results = []
+        for i in range(n_agents):
+            if i in got:
+                results.append(got[i])
+            else:  # scripted incumbent or forced cut: no model call
+                price = scripted[i][k] if i in scripted else round(float(env.lower_prices[i]), 2)
+                kind = "replay" if i in scripted else "forced_nash"
+                results.append({"price": price, "thoughts": "", "response": "",
+                                "metrics": {"model": kind, "scripted": True, "success": True, "attempts": 0}})
         actions = [r["price"] for r in results]
         prices, demands, profits, gains, prompts = env.step(actions)
         if env_repl:

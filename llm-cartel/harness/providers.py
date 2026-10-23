@@ -114,8 +114,19 @@ class ChatProvider:
     """One OpenAI-compatible chat-completions client for a (provider, model) pair."""
 
     def __init__(self, spec: str, temperature: float = 1.0, max_tokens: int = 4096, reasoning: bool = True):
-        """reasoning=False asks OpenRouter to disable thinking (used by the judge to keep answers short)."""
+        """reasoning=False asks OpenRouter to disable thinking (used by the judge to keep answers short).
+
+        Inherited-collusion additions, written into the model id so they land in every run config:
+          '+nothink'   append Qwen3's '/no_think' soft switch to the user turn (OpenRouter ignores
+                       reasoning.enabled=False for qwen/qwen3-14b; the soft switch works)
+          '@<host>'    pin one OpenRouter host, no fallbacks (e.g. qwen/qwen3-14b@deepinfra+nothink)
+        """
         self.provider, self.model = parse_model_spec(spec)
+        self.no_think = "+nothink" in self.model
+        self.model = self.model.replace("+nothink", "")
+        self.pin = None
+        if "@" in self.model:
+            self.model, self.pin = self.model.split("@", 1)
         preset = PRESETS[self.provider]
         self.base_url = os.getenv("LLM_BASE_URL") if self.provider == "custom" else preset.base_url
         if not self.base_url:
@@ -146,7 +157,9 @@ class ChatProvider:
 
     @property
     def spec(self) -> str:
-        return f"{self.provider}:{self.model}"
+        pin = f"@{self.pin}" if self.pin else ""
+        nothink = "+nothink" if self.no_think else ""
+        return f"{self.provider}:{self.model}{pin}{nothink}"
 
     def complete(self, messages: List[Message], seed: Optional[int] = None) -> Tuple[str, dict]:
         """Return (text, metrics). Raises on transport errors."""
@@ -154,8 +167,17 @@ class ChatProvider:
         kwargs = {}
         if seed is not None and self.supports_seed:
             kwargs["seed"] = seed
+        extra_body = {}
         if self.provider == "openrouter" and not self.reasoning:
-            kwargs["extra_body"] = {"reasoning": {"enabled": False}}
+            extra_body["reasoning"] = {"enabled": False}
+        if self.pin:
+            extra_body["provider"] = {"only": [self.pin], "allow_fallbacks": False}
+        if extra_body:
+            kwargs["extra_body"] = extra_body
+        if self.no_think:
+            messages = [dict(m) for m in messages]
+            last_user = max(i for i, m in enumerate(messages) if m["role"] == "user")
+            messages[last_user]["content"] += "\n/no_think"
         from openai import AuthenticationError, BadRequestError, NotFoundError, PermissionDeniedError
 
         try:

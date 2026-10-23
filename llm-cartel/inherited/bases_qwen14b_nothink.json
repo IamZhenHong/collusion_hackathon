@@ -1,0 +1,82 @@
+{
+  "rule": {
+    "window": 20,
+    "span": 0.1,
+    "price_index": 0.5
+  },
+  "nash": 1.4729266600306228,
+  "monopoly": 1.9249809190176552,
+  "bases": [],
+  "excluded": [
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed0.jsonl",
+      "final_prices": [
+        1.48,
+        1.48
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed1.jsonl",
+      "final_prices": [
+        1.51,
+        1.51
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed2.jsonl",
+      "final_prices": [
+        1.43,
+        1.43
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed3.jsonl",
+      "final_prices": [
+        1.51,
+        1.51
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed4.jsonl",
+      "final_prices": [
+        1.45,
+        1.45
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed5.jsonl",
+      "final_prices": [
+        1.51,
+        1.51
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed6.jsonl",
+      "final_prices": [
+        1.51,
+        1.51
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed7.jsonl",
+      "final_prices": [
+        1.47,
+        1.47
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed8.jsonl",
+      "final_prices": [
+        1.47,
+        1.47
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PC-PC_model_openrouter-qwen-qwen3-14b@deepinfraplusnothink-openrouter-qwen-qwen3-14b@deepinfraplusnothink_win100_temp1p0_seed9.jsonl",
+      "final_prices": [
+        1.51,
+        1.51
+      ]
+    }
+  ]
+}
