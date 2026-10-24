@@ -44,7 +44,8 @@ def branch_metrics(path: Path) -> dict:
     after = [r for r in recs if r.get("branch_phase") == "after"]
     inh = cfg.get("inherited", {})
     # p_c: the replayed price; for live arms the same 20-round mean the replay would have used
-    p_c = inh.get("x_price") or round(float(np.mean([r["actions"][INCUMBENT] for r in before[-20:]])), 2)
+    # the incumbent's pre-branch price (x_price can be a one-round cut in incumbent_cut_round arms)
+    p_c = inh.get("p_c_pre") or inh.get("x_price") or round(float(np.mean([r["actions"][INCUMBENT] for r in before[-20:]])), 2)
     br = BM.best_response(p_c)
     new = np.array([r["actions"][NEWCOMER] for r in after], dtype=float)
     inc = np.array([r["actions"][INCUMBENT] for r in after], dtype=float)
@@ -66,6 +67,7 @@ def branch_metrics(path: Path) -> dict:
         row[f"excess_{k}"] = mean_p - br
     for k0 in (2, 11):  # exploratory / experiment 6: rounds k0..30, to compare with a forced round at k0-1
         row[f"I_from{k0}"] = (float(new[k0 - 1 :][chosen[k0 - 1 :]].mean()) - br) / (p_c - br)
+    row["inc_shift"] = float(inc[1:].mean() - p_c)  # incumbent response (live arms), rounds 2-30
     if inh.get("force_cut_round"):
         K = inh["force_cut_round"]
         row["keeps_forced"] = float((np.abs(new[K:] - new[K - 1]) <= 0.005).mean())
@@ -251,6 +253,34 @@ def analyse_set(df: pd.DataFrame, name: str) -> list[str]:
             verdict = "SUPPORTED" if excludes0(d[1]) and d[0] < 0 else "NOT SUPPORTED"
             L.append(f"- **H6 {arm}** I(rounds {k0}-30) {arm} - {ctrl} {fmt(*d[:2])}, p = {P.wilcoxon(arm, ctrl):.3f}; "
                      f"keeps the forced Nash price in {keep:.0%} of later rounds -> **{verdict}**")
+    h7 = [("H7a forced Nash vs sham (round 1)", "R1_nash", "S1_cartel", 2),
+          ("H7a forced Nash vs sham (round 10)", "R10_nash", "S10_cartel", 11),
+          ("sham vs F_own (round 1, descriptive)", "S1_cartel", "F_own", 2),
+          ("H7b own, real (R1_nash)", "R1_nash", "F_own", 2),
+          ("H7b/H7c own, fake row (K_own)", "K_own", "F_own", 2),
+          ("H7b predecessor's, fake row (K_pred)", "K_pred", "F_own", 2),
+          ("K_pred vs F_pred (descriptive)", "K_pred", "F_pred", 2),
+          ("H7b competitor's, once (C1_nash)", "C1_nash", "F_own", 2),
+          ("H7b' forced best response (R1_br)", "R1_br", "F_own", 2),
+          ("H7d identity vs instruction", "ID_system", "Fix_system", 2),
+          ("H7e live: forced Nash round 1", "LR1_nash", "L_free", 2),
+          ("H7e live: fake row", "LK_own", "L_free", 2)]
+    if any(a in have for _, a, _, _ in h7):
+        L += ["", "## Addendum 2 (experiment 7), I over rounds 2-30 (11-30 for round 10)", ""]
+        for name, arm, ctrl, k0 in h7:
+            if not {arm, ctrl} <= have:
+                continue
+            P = Paired(df, f"I_from{k0}")
+            d = P.stat(lambda d, a=arm, c=ctrl: d[a] - d[c], [arm, ctrl])
+            extra = ""
+            if "keeps_forced" in df and df[df.arm == arm]["keeps_forced"].notna().any():
+                extra += f"; holds the forced price in {df[df.arm == arm]['keeps_forced'].mean():.0%} of later rounds"
+            if arm.startswith("L"):
+                extra += (f"; incumbent price shift {df[df.arm == arm]['inc_shift'].mean():+.3f} "
+                          f"(control {df[df.arm == ctrl]['inc_shift'].mean():+.3f}), market gain "
+                          f"{df[df.arm == arm]['market_gain'].mean():+.2f} (control {df[df.arm == ctrl]['market_gain'].mean():+.2f})")
+            verdict = "" if "descriptive" in name else (" -> **SUPPORTED**" if excludes0(d[1]) and d[0] < 0 else " -> **NOT SUPPORTED**")
+            L.append(f"- **{name}** {arm} - {ctrl} {fmt(*d[:2])}, p = {P.wilcoxon(arm, ctrl):.3f}{extra}{verdict}")
     excl = df[df.parse_fail > 0.2]
     L += ["", f"Excluded branches (>20% parse failures): {len(excl)}"
           + ("" if excl.empty else ": " + ", ".join(excl.base + "/" + excl.arm + "_s" + excl.seed.astype(str)))]
@@ -429,7 +459,7 @@ def main():
     df.to_csv(OUT / "branches.csv", index=False)
     for (baseset, newcomer), g in df.groupby(["baseset", "newcomer"]):
         print("\n".join(analyse_set(g, f"{baseset}__{newcomer}")), "\n")
-    for baseset in sorted(b for b in set(df.baseset) if not b.endswith("_exp6")):
+    for baseset in sorted(b for b in set(df.baseset) if not b.endswith(("_exp6", "_exp7"))):
         try:
             figures(df, baseset)
             if f"{baseset}_exp6" in set(df.baseset):

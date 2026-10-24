@@ -212,7 +212,7 @@ def main() -> None:
             scripted[i][args.incumbent_cut_round - 1] = round(float(config["nash_prices"][i]), 2)
     x_price = None
     if scripted:
-        x_price = float(np.mean([scripted[i][0] for i in scripted])) if args.incumbent_mode == "replay_mean" else None
+        x_price = p_c_pre if args.incumbent_mode == "replay_mean" else None  # before any one-round cut
 
     hook_args = ("history_owner", "history_header", "after_history", "before_answer", "system_suffix")
     inherited_set = (

@@ -22,4 +22,8 @@ Intervals: 95% bootstrap over bases. p = paired Wilcoxon on base-level differenc
 - **H6 R10_nash** I(rounds 11-30) R10_nash - F_own -0.503 [-1.009, -0.130], p = 0.188; keeps the forced Nash price in 33% of later rounds -> **SUPPORTED**
 - **H6 R1_nash_hidden** I(rounds 2-30) R1_nash_hidden - F_hidden +0.008 [+0.000, +0.021], p = 0.500; keeps the forced Nash price in 0% of later rounds -> **NOT SUPPORTED**
 
+## Addendum 2 (experiment 7), I over rounds 2-30 (11-30 for round 10)
+
+- **H7b own, real (R1_nash)** R1_nash - F_own -0.307 [-0.732, +0.010], p = 0.625; holds the forced price in 22% of later rounds -> **NOT SUPPORTED**
+
 Excluded branches (>20% parse failures): 0

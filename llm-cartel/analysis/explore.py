@@ -64,7 +64,7 @@ def main():
         before = [r for r in recs if r["branch_phase"] == "before"]
         after = [r for r in recs if r["branch_phase"] == "after"]
         inh = cfg.get("inherited", {})
-        p_c = inh.get("x_price") or round(float(np.mean([r["actions"][0] for r in before[-20:]])), 2)
+        p_c = inh.get("p_c_pre") or inh.get("x_price") or round(float(np.mean([r["actions"][0] for r in before[-20:]])), 2)
         br = BM.best_response(p_c)
         new = [r["actions"][1] for r in after]
         record = [r["actions"][1] for r in before]
