@@ -1,0 +1,119 @@
+{
+  "rule": {
+    "window": 20,
+    "span": 0.1,
+    "price_index": 0.5
+  },
+  "nash": 1.4729266600306228,
+  "monopoly": 1.9249809190176552,
+  "bases": [
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed10.jsonl",
+      "branch_round": 24,
+      "p_c": 1.87,
+      "incumbent_last_price": 1.9,
+      "br_p_c": 1.6413,
+      "price_index_p_c": 0.878,
+      "above_monopoly": false
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed11.jsonl",
+      "branch_round": 21,
+      "p_c": 2.49,
+      "incumbent_last_price": 2.49,
+      "br_p_c": 1.7795,
+      "price_index_p_c": 2.25,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed12.jsonl",
+      "branch_round": 97,
+      "p_c": 2.02,
+      "incumbent_last_price": 1.99,
+      "br_p_c": 1.6933,
+      "price_index_p_c": 1.21,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed13.jsonl",
+      "branch_round": 27,
+      "p_c": 2.0,
+      "incumbent_last_price": 2.0,
+      "br_p_c": 1.6871,
+      "price_index_p_c": 1.166,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed14.jsonl",
+      "branch_round": 23,
+      "p_c": 1.88,
+      "incumbent_last_price": 1.9,
+      "br_p_c": 1.6451,
+      "price_index_p_c": 0.9,
+      "above_monopoly": false
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed15.jsonl",
+      "branch_round": 23,
+      "p_c": 1.99,
+      "incumbent_last_price": 2.0,
+      "br_p_c": 1.6839,
+      "price_index_p_c": 1.144,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed16.jsonl",
+      "branch_round": 28,
+      "p_c": 1.96,
+      "incumbent_last_price": 1.99,
+      "br_p_c": 1.6739,
+      "price_index_p_c": 1.077,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed17.jsonl",
+      "branch_round": 26,
+      "p_c": 1.99,
+      "incumbent_last_price": 2.05,
+      "br_p_c": 1.6839,
+      "price_index_p_c": 1.144,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed18.jsonl",
+      "branch_round": 32,
+      "p_c": 2.15,
+      "incumbent_last_price": 2.15,
+      "br_p_c": 1.7284,
+      "price_index_p_c": 1.498,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed20.jsonl",
+      "branch_round": 44,
+      "p_c": 2.3,
+      "incumbent_last_price": 2.3,
+      "br_p_c": 1.7573,
+      "price_index_p_c": 1.83,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed21.jsonl",
+      "branch_round": 30,
+      "p_c": 1.88,
+      "incumbent_last_price": 1.88,
+      "br_p_c": 1.6451,
+      "price_index_p_c": 0.9,
+      "above_monopoly": false
+    }
+  ],
+  "excluded": [
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed19.jsonl",
+      "final_prices": [
+        2.05,
+        2.05
+      ]
+    }
+  ]
+}

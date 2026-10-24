@@ -67,6 +67,10 @@ def branch_metrics(path: Path) -> dict:
         row[f"excess_{k}"] = mean_p - br
     for k0 in (2, 11):  # exploratory / experiment 6: rounds k0..30, to compare with a forced round at k0-1
         row[f"I_from{k0}"] = (float(new[k0 - 1 :][chosen[k0 - 1 :]].mean()) - br) / (p_c - br)
+    if len(after) >= 80:  # durability (addendum 3): rounds 61-80
+        late = new[60:80]
+        row["I_61_80"] = (float(late.mean()) - br) / (p_c - br)
+        row["late_at_nash"] = float((np.abs(late - round(BM.nash, 2)) <= 0.005).mean())
     row["inc_shift"] = float(inc[1:].mean() - p_c)  # incumbent response (live arms), rounds 2-30
     if inh.get("force_cut_round"):
         K = inh["force_cut_round"]
@@ -281,6 +285,26 @@ def analyse_set(df: pd.DataFrame, name: str) -> list[str]:
                           f"{df[df.arm == arm]['market_gain'].mean():+.2f} (control {df[df.arm == ctrl]['market_gain'].mean():+.2f})")
             verdict = "" if "descriptive" in name else (" -> **SUPPORTED**" if excludes0(d[1]) and d[0] < 0 else " -> **NOT SUPPORTED**")
             L.append(f"- **{name}** {arm} - {ctrl} {fmt(*d[:2])}, p = {P.wilcoxon(arm, ctrl):.3f}{extra}{verdict}")
+    h8 = [("H8c recency: one fake row 5 rounds back vs F_own", "K_own_lag5", "F_own", "I_from2"),
+          ("H8c recency: 5 rounds back vs most recent", "K_own_lag5", "K_own", "I_from2"),
+          ("H8c dose: 3 fake rows vs 1", "K_own_x3", "K_own", "I_from2"),
+          ("H8b durability: fake row vs F_own, rounds 61-80", "K_own", "F_own", "I_61_80"),
+          ("H8b durability: forced round vs F_own, rounds 61-80", "R1_nash", "F_own", "I_61_80")]
+    shown = False
+    for name, arm, ctrl, metric in h8:
+        if not {arm, ctrl} <= have or metric not in df or df[df.arm == arm][metric].isna().all():
+            continue
+        if not shown:
+            L += ["", "## Addendum 3", ""]
+            shown = True
+        P = Paired(df, metric)
+        d = P.stat(lambda d, a=arm, c=ctrl: d[a] - d[c], [arm, ctrl])
+        extra = ""
+        if metric == "I_61_80":
+            extra = (f"; rounds 61-80 at the Nash price: {arm} {df[df.arm == arm]['late_at_nash'].mean():.0%}, "
+                     f"{ctrl} {df[df.arm == ctrl]['late_at_nash'].mean():.0%}")
+        verdict = " -> **SUPPORTED**" if excludes0(d[1]) and d[0] < 0 else " -> **NOT SUPPORTED**"
+        L.append(f"- **{name}** {arm} - {ctrl} {fmt(*d[:2])}, p = {P.wilcoxon(arm, ctrl):.3f}{extra}{verdict}")
     excl = df[df.parse_fail > 0.2]
     L += ["", f"Excluded branches (>20% parse failures): {len(excl)}"
           + ("" if excl.empty else ": " + ", ".join(excl.base + "/" + excl.arm + "_s" + excl.seed.astype(str)))]
@@ -292,7 +316,8 @@ def analyse_set(df: pd.DataFrame, name: str) -> list[str]:
 INK, INK2, GRID, SURFACE = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
 SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]  # validated (light): adjacent CVD dE >= 9.1
 FAMILY = {"openai-gpt-4p1-mini": ("gpt-4.1-mini", SERIES[0]),
-          "qwen-qwen3-14b-deepinfra-nothink": ("Qwen3-14B (no-think)", SERIES[1])}
+          "qwen-qwen3-14b-deepinfra-nothink": ("Qwen3-14B (no-think)", SERIES[1]),
+          "anthropic-claude-haiku-5p5-noreason": ("Claude Haiku 5.5 (no reasoning)", SERIES[2])}
 
 
 def style(ax):
@@ -503,6 +528,48 @@ def figure_levers(df: pd.DataFrame, baseset: str):
     plt.close(fig)
 
 
+def figure_replication(df: pd.DataFrame):
+    """Addendum 3: experiment-7 contrasts on all 20 PI bases, three newcomer families (rounds 2-30)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    rows = [("Sham: forced to the cartel price", "S1_cartel", "F_own"),
+            ("Competitor's competitive price, once", "C1_nash", "F_own"),
+            ("Own competitive price, real round", "R1_nash", "F_own"),
+            ("Own competitive price, fake row", "K_own", "F_own"),
+            ("Same fake row, labelled the predecessor's", "K_pred", "F_own"),
+            ("Live incumbent: own price, real round", "LR1_nash", "L_free"),
+            ("Live incumbent: own price, fake row", "LK_own", "L_free")]
+    sets = {"openai-gpt-4p1-mini": ["gpt41mini_PI_exp7", "gpt41mini_PI2"],
+            "qwen-qwen3-14b-deepinfra-nothink": ["gpt41mini_PI_exp7", "gpt41mini_PI2"],
+            "anthropic-claude-haiku-5p5-noreason": ["gpt41mini_PIall"]}
+    fig, ax = plt.subplots(figsize=(10, 0.55 * len(rows) + 1.6), facecolor=SURFACE)
+    style(ax)
+    fams = [f for f in sets if f in set(df.newcomer)]
+    for j, fam in enumerate(fams):
+        dd = df[(df.newcomer == fam) & df.baseset.isin(sets[fam])]
+        P = Paired(dd, "I_from2")
+        for i, (label, arm, ctrl) in enumerate(rows):
+            if not {arm, ctrl} <= set(P.t.columns):
+                continue
+            pt, ci, n = P.stat(lambda d, a=arm, c=ctrl: d[a] - d[c], [arm, ctrl])
+            y = i + (j - (len(fams) - 1) / 2) * 0.24
+            ax.plot(ci, [y, y], color=FAMILY[fam][1], linewidth=2, solid_capstyle="round")
+            ax.plot(pt, y, "o", color=FAMILY[fam][1], markersize=7, markeredgecolor=SURFACE, markeredgewidth=1.5,
+                    label=FAMILY[fam][0] if i == 0 else None)
+    ax.axvline(0, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
+    ax.set_yticks(range(len(rows)), [r[0] for r in rows], color=INK)
+    ax.invert_yaxis()
+    ax.axhline(4.5, color=GRID, linewidth=1.5)
+    ax.legend(frameon=False, labelcolor=INK, loc="center left", bbox_to_anchor=(1.01, 0.5))
+    ax.set_xlabel("Change in inheritance index, post-branch rounds 2-30, vs control (95% CI over 20 bases)", color=INK2)
+    ax.set_title("One competitive price on the newcomer's own side of the record", color=INK, loc="left", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(OUT / "figures" / "fig6_replication_20bases.png", dpi=200)
+    plt.close(fig)
+
+
 def main():
     df = load_all()
     if df.empty:
@@ -511,7 +578,11 @@ def main():
     df.to_csv(OUT / "branches.csv", index=False)
     for (baseset, newcomer), g in df.groupby(["baseset", "newcomer"]):
         print("\n".join(analyse_set(g, f"{baseset}__{newcomer}")), "\n")
-    for baseset in sorted(b for b in set(df.baseset) if not b.endswith(("_exp6", "_exp7"))):
+    # addendum 3, secondary: experiment-7 bases pooled with the fresh replication bases (base ids are unique)
+    for newcomer, g in df[df.baseset.isin(["gpt41mini_PI_exp7", "gpt41mini_PI2"])].groupby("newcomer"):
+        if g.baseset.nunique() == 2:
+            print("\n".join(analyse_set(g, f"pooled_PI_exp7+PI2__{newcomer}")), "\n")
+    for baseset in sorted(b for b in set(df.baseset) if "Fix_verdict" in set(df[df.baseset == b].arm)):
         try:
             figures(df, baseset)
             if f"{baseset}_exp6" in set(df.baseset):
@@ -521,6 +592,10 @@ def main():
         except ImportError:
             print("matplotlib missing: run with `uv run --with matplotlib`")
             break
+    try:
+        figure_replication(df)
+    except ImportError:
+        pass
 
 
 if __name__ == "__main__":

@@ -1,0 +1,207 @@
+{
+  "rule": {
+    "window": 20,
+    "span": 0.1,
+    "price_index": 0.5
+  },
+  "nash": 1.4729266600306228,
+  "monopoly": 1.9249809190176552,
+  "bases": [
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed0.jsonl",
+      "branch_round": 75,
+      "p_c": 2.29,
+      "incumbent_last_price": 2.29,
+      "br_p_c": 1.7557,
+      "price_index_p_c": 1.807,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed1.jsonl",
+      "branch_round": 43,
+      "p_c": 2.15,
+      "incumbent_last_price": 2.15,
+      "br_p_c": 1.7284,
+      "price_index_p_c": 1.498,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed2.jsonl",
+      "branch_round": 23,
+      "p_c": 2.1,
+      "incumbent_last_price": 2.1,
+      "br_p_c": 1.716,
+      "price_index_p_c": 1.387,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed3.jsonl",
+      "branch_round": 37,
+      "p_c": 2.14,
+      "incumbent_last_price": 2.2,
+      "br_p_c": 1.726,
+      "price_index_p_c": 1.476,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed4.jsonl",
+      "branch_round": 24,
+      "p_c": 2.15,
+      "incumbent_last_price": 2.15,
+      "br_p_c": 1.7284,
+      "price_index_p_c": 1.498,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed5.jsonl",
+      "branch_round": 22,
+      "p_c": 2.1,
+      "incumbent_last_price": 2.1,
+      "br_p_c": 1.716,
+      "price_index_p_c": 1.387,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed6.jsonl",
+      "branch_round": 27,
+      "p_c": 2.1,
+      "incumbent_last_price": 2.1,
+      "br_p_c": 1.716,
+      "price_index_p_c": 1.387,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed7.jsonl",
+      "branch_round": 27,
+      "p_c": 2.3,
+      "incumbent_last_price": 2.3,
+      "br_p_c": 1.7573,
+      "price_index_p_c": 1.83,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed9.jsonl",
+      "branch_round": 22,
+      "p_c": 2.07,
+      "incumbent_last_price": 2.09,
+      "br_p_c": 1.7079,
+      "price_index_p_c": 1.321,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed10.jsonl",
+      "branch_round": 24,
+      "p_c": 1.87,
+      "incumbent_last_price": 1.9,
+      "br_p_c": 1.6413,
+      "price_index_p_c": 0.878,
+      "above_monopoly": false
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed11.jsonl",
+      "branch_round": 21,
+      "p_c": 2.49,
+      "incumbent_last_price": 2.49,
+      "br_p_c": 1.7795,
+      "price_index_p_c": 2.25,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed12.jsonl",
+      "branch_round": 97,
+      "p_c": 2.02,
+      "incumbent_last_price": 1.99,
+      "br_p_c": 1.6933,
+      "price_index_p_c": 1.21,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed13.jsonl",
+      "branch_round": 27,
+      "p_c": 2.0,
+      "incumbent_last_price": 2.0,
+      "br_p_c": 1.6871,
+      "price_index_p_c": 1.166,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed14.jsonl",
+      "branch_round": 23,
+      "p_c": 1.88,
+      "incumbent_last_price": 1.9,
+      "br_p_c": 1.6451,
+      "price_index_p_c": 0.9,
+      "above_monopoly": false
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed15.jsonl",
+      "branch_round": 23,
+      "p_c": 1.99,
+      "incumbent_last_price": 2.0,
+      "br_p_c": 1.6839,
+      "price_index_p_c": 1.144,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed16.jsonl",
+      "branch_round": 28,
+      "p_c": 1.96,
+      "incumbent_last_price": 1.99,
+      "br_p_c": 1.6739,
+      "price_index_p_c": 1.077,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed17.jsonl",
+      "branch_round": 26,
+      "p_c": 1.99,
+      "incumbent_last_price": 2.05,
+      "br_p_c": 1.6839,
+      "price_index_p_c": 1.144,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed18.jsonl",
+      "branch_round": 32,
+      "p_c": 2.15,
+      "incumbent_last_price": 2.15,
+      "br_p_c": 1.7284,
+      "price_index_p_c": 1.498,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed20.jsonl",
+      "branch_round": 44,
+      "p_c": 2.3,
+      "incumbent_last_price": 2.3,
+      "br_p_c": 1.7573,
+      "price_index_p_c": 1.83,
+      "above_monopoly": true
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed21.jsonl",
+      "branch_round": 30,
+      "p_c": 1.88,
+      "incumbent_last_price": 1.88,
+      "br_p_c": 1.6451,
+      "price_index_p_c": 0.9,
+      "above_monopoly": false
+    }
+  ],
+  "excluded": [
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed8.jsonl",
+      "final_prices": [
+        2.15,
+        2.3
+      ]
+    },
+    {
+      "run": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed19.jsonl",
+      "final_prices": [
+        2.05,
+        2.05
+      ]
+    }
+  ]
+}
