@@ -72,6 +72,16 @@ def branch_metrics(path: Path) -> dict:
         row["I_61_80"] = (float(late.mean()) - br) / (p_c - br)
         row["late_at_nash"] = float((np.abs(late - round(BM.nash, 2)) <= 0.005).mean())
     row["inc_shift"] = float(inc[1:].mean() - p_c)  # incumbent response (live arms), rounds 2-30
+    row["profit_30"] = float(np.mean([r["profits"][NEWCOMER] for r in after[:30]]))
+    row["I_1_5"] = (float(new[:5].mean()) - br) / (p_c - br)
+    if inh.get("fake_last_row"):  # addendum 4: share of rounds at the fake row's price
+        fake = {"nash": round(BM.nash, 2), "br": round(BM.best_response(p_c), 2), "cost": 1.0,
+                "cartel": p_c}[inh["fake_last_row"]]
+        row["copy_1_5"] = float((np.abs(new[:5] - fake) <= 0.005).mean())
+        row["copy_21_30"] = float((np.abs(new[20:30] - fake) <= 0.005).mean())
+    resumed = np.array([bool(r.get("resumed")) for r in after])
+    if resumed.any():  # addendum 4 forks: rounds played after the fork
+        row["I_new"] = (float(new[~resumed].mean()) - br) / (p_c - br)
     if inh.get("force_cut_round"):
         K = inh["force_cut_round"]
         row["keeps_forced"] = float((np.abs(new[K:] - new[K - 1]) <= 0.005).mean())
@@ -305,6 +315,40 @@ def analyse_set(df: pd.DataFrame, name: str) -> list[str]:
                      f"{ctrl} {df[df.arm == ctrl]['late_at_nash'].mean():.0%}")
         verdict = " -> **SUPPORTED**" if excludes0(d[1]) and d[0] < 0 else " -> **NOT SUPPORTED**"
         L.append(f"- **{name}** {arm} - {ctrl} {fmt(*d[:2])}, p = {P.wilcoxon(arm, ctrl):.3f}{extra}{verdict}")
+    a4 = [("H9a sham row (cartel price) vs F_own", "K_own_cartel", "F_own"),
+          ("H9b profitable row (best response) vs F_own", "K_own_br", "F_own"),
+          ("bad row (unit cost) vs F_own", "K_own_cost", "F_own"),
+          ("Nash row (reference) vs F_own", "K_own", "F_own")]
+    if "K_own_cost" in have:
+        L += ["", "## Addendum 4, test 1: copy or learn (I and newcomer profit per round, rounds 1-30)", ""]
+        I30, PR, I15 = Paired(df, "I_30"), Paired(df, "profit_30"), Paired(df, "I_1_5")
+        for name, arm, ctrl in a4:
+            if not {arm, ctrl} <= have:
+                continue
+            d = I30.stat(lambda d, a=arm, c=ctrl: d[a] - d[c], [arm, ctrl])
+            d5 = I15.stat(lambda d, a=arm, c=ctrl: d[a] - d[c], [arm, ctrl])
+            pr = PR.stat(lambda d, a=arm, c=ctrl: d[a] - d[c], [arm, ctrl])
+            g = df[df.arm == arm]
+            L.append(f"- **{name}** I {fmt(*d[:2])} (rounds 1-5: {fmt(*d5[:2])}); profit/round {fmt(*pr[:2], 2)} $; "
+                     f"at the fake price: rounds 1-5 {g['copy_1_5'].mean():.0%}, rounds 21-30 {g['copy_21_30'].mean():.0%}")
+        g = df[df.arm == "K_own_cost"]
+        c15, c2130 = g["copy_1_5"].mean(), g["copy_21_30"].mean()
+        pr = PR.stat(lambda d: d["K_own_cost"] - d["F_own"], ["K_own_cost", "F_own"])
+        if c15 >= 0.5:
+            reading = "action copying" + (" then adaptation" if c15 - c2130 >= 0.25 else "")
+        elif c15 < 0.25 and (pr[1][0] <= 0 <= pr[1][1] or pr[0] > 0):
+            reading = "profit-sensitive"
+        else:
+            reading = "none of the pre-registered readings"
+        L.append(f"- **H9c reading (bad row):** {reading} (share at $1.00: {c15:.0%} in rounds 1-5, {c2130:.0%} in 21-30)")
+    if "fork_keep" in have:
+        L += ["", "## Addendum 4, test 2: does the effect outlast the row? (I over rounds 11-35, after the fork)", ""]
+        P = Paired(df, "I_new")
+        for a, c in (("fork_delfake", "fork_keep"), ("fork_deladj", "fork_keep"), ("fork_delfake", "fork_deladj")):
+            d = P.stat(lambda d, a=a, c=c: d[a] - d[c], [a, c])
+            L.append(f"- **{a} - {c}** {fmt(*d[:2])}, p = {P.wilcoxon(a, c):.3f}")
+        for a in ("fork_keep", "fork_delfake", "fork_deladj"):
+            L.append(f"  - {a}: I(rounds 11-35) = {fmt(*P.stat(lambda d, a=a: d[a], [a])[:2])}")
     excl = df[df.parse_fail > 0.2]
     L += ["", f"Excluded branches (>20% parse failures): {len(excl)}"
           + ("" if excl.empty else ": " + ", ".join(excl.base + "/" + excl.arm + "_s" + excl.seed.astype(str)))]
