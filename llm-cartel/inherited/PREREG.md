@@ -131,3 +131,6 @@ Same bases, newcomers, seeds and statistics as above.
 forced round (2-30 for round 1, 11-30 for round 10) is negative with its interval excluding 0; controls
 F_own, F_own, F_hidden over the same rounds. Reported with the share of later rounds the newcomer keeps
 the forced price. Prediction: supported for gpt-4.1-mini in all three arms; for Qwen3-14B in R1_nash_hidden.
+Controls are re-run interleaved with the experiment 6 arms in one shuffled job (branch set
+`gpt41mini_PI_exp6`, same 9 PI bases), since frontier-model behaviour can drift between runs; H6 is
+decided on that set.
