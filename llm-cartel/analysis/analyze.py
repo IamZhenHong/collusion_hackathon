@@ -614,6 +614,43 @@ def figure_replication(df: pd.DataFrame):
     plt.close(fig)
 
 
+def figure_copy_learn(df: pd.DataFrame, baseset: str = "gpt41mini_PI_exp9"):
+    """Addendum 4, test 1: one fake own row at four prices; gpt-4.1-mini, 10 bases."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    rows = [("Sham: cartel price (same profit as the cartel rows)", "K_own_cartel"),
+            ("Unit cost $1.00 (zero profit)", "K_own_cost"),
+            ("Nash price (more profit than the cartel rows)", "K_own"),
+            ("Its best response (the most profit)", "K_own_br")]
+    d0 = df[(df.baseset == baseset) & (df.newcomer == "openai-gpt-4p1-mini")]
+    if d0.empty:
+        return
+    P = Paired(d0, "I_30")
+    fig, ax = plt.subplots(figsize=(10, 2.9), facecolor=SURFACE)
+    style(ax)
+    for i, (label, arm) in enumerate(rows):
+        if arm not in P.t.columns:
+            continue
+        pt, ci, _ = P.stat(lambda d, a=arm: d[a] - d["F_own"], [arm, "F_own"])
+        ax.plot(ci, [i, i], color=SERIES[0], linewidth=2, solid_capstyle="round")
+        ax.plot(pt, i, "o", color=SERIES[0], markersize=7, markeredgecolor=SURFACE, markeredgewidth=1.5)
+        held = d0[d0.arm == arm]["copy_21_30"].mean()
+        ax.annotate(f"{held:.0%} of rounds 21-30 at this price", (max(ci[1], pt), i), xytext=(8, 0),
+                    textcoords="offset points", va="center", fontsize=8, color=INK2)
+    ax.axvline(0, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
+    ax.set_yticks(range(len(rows)), [r[0] for r in rows], color=INK)
+    ax.invert_yaxis()
+    ax.set_xlim(-1.7, 1.1)
+    ax.set_xlabel("Change in inheritance index vs F_own, rounds 1-30 (95% CI over 10 bases)", color=INK2)
+    ax.set_title("gpt-4.1-mini: one fake own row moves its price only if the row paid more", color=INK,
+                 loc="left", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "figures" / "fig7_copy_or_learn.png", dpi=200)
+    plt.close(fig)
+
+
 def main():
     df = load_all()
     if df.empty:
@@ -638,6 +675,7 @@ def main():
             break
     try:
         figure_replication(df)
+        figure_copy_learn(df)
     except ImportError:
         pass
 
