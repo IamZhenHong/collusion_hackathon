@@ -8,7 +8,7 @@ PREFIX=${PREFIX:-PC}
 MODELS=${MODELS:-"qwen/qwen3-14b@deepinfra+nothink openai/gpt-4.1-mini"}
 for model in $MODELS; do
   tag=$(echo "$model" | tr '/@+.' '----')
-  for seed in 0 1 2 3 4 5 6 7 8 9; do
+  for seed in ${SEEDS:-0 1 2 3 4 5 6 7 8 9}; do
     uv run python run_game.py --models "$model" --prefix "$PREFIX" --rounds 120 --seeds $seed \
       --out_dir results/base -y > "logs/base/${tag}_${PREFIX}_seed${seed}.log" 2>&1 &
   done

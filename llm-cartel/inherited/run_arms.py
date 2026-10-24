@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from inherited.arms import ARMS, arm_flags, experiment_arms  # noqa: E402
 
-PRICE_PER_M_INPUT = {"openai/gpt-4.1-mini": 0.40, "qwen/qwen3-14b": 0.12}
+PRICE_PER_M_INPUT = {"openai/gpt-4.1-mini": 0.40, "qwen/qwen3-14b": 0.12, "anthropic/claude-haiku-5.5": 0.10}
 TOKENS_PER_ROUND, TOKENS_FIXED = 32, 360  # measured on the printed prompts (T5)
 
 
@@ -53,6 +53,8 @@ def main():
     ap.add_argument("--workers", type=int, default=16)
     ap.add_argument("--out_root", default="results/branches")
     ap.add_argument("--dry_run", action="store_true")
+    ap.add_argument("--extra", nargs=argparse.REMAINDER, default=[],
+                    help="flags appended to every branch_game call (e.g. --extra --saydo_round 2); must come last")
     ap.add_argument("-y", "--yes", action="store_true")
     args = ap.parse_args()
 
@@ -67,7 +69,7 @@ def main():
     random.Random(12345).shuffle(jobs)
     todo = [j for j in jobs if not done(out_dir / out_name(*j))]
 
-    model = args.newcomer.split("@")[0].replace("+nothink", "")
+    model = args.newcomer.split("@")[0].replace("+nothink", "").replace("+noreason", "")
     tokens = sum((j[0]["branch_round"] + 2 + args.rounds / 2) * TOKENS_PER_ROUND + TOKENS_FIXED for j in todo)
     tokens *= args.rounds
     cost = tokens / 1e6 * PRICE_PER_M_INPUT.get(model, 1.0)
@@ -85,7 +87,8 @@ def main():
         flags, prefix = arm_flags(arm)
         cmd = [sys.executable, "branch_game.py", base["run"], "--at_round", str(base["branch_round"]),
                "--replace", f"1={args.newcomer}", "--replace_prefix", prefix, "--rounds", str(args.rounds),
-               "--seed", str(seed), "--label", f"{arm}_s{seed}", "--out_dir", str(out_dir), "-y", *flags]
+               "--seed", str(seed), "--label", f"{arm}_s{seed}", "--out_dir", str(out_dir), "-y", *flags,
+               *args.extra]
         log = log_dir / (out_name(*job) + ".log")
         for attempt in (1, 2):
             with open(log, "w") as f:

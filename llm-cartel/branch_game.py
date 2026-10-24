@@ -85,6 +85,32 @@ def parse_replacements(items):
     return out
 
 
+SAYDO_QUESTION = ("Before you set this round's price: in one or two sentences, describe the pricing strategy "
+                  "you plan to follow over the coming rounds, and why.")
+
+
+def say_do(provider, prompt, seed, attempts=3):
+    """Ask the same agent, in a separate call that does not affect play, to state its pricing strategy.
+
+    The prompt is the agent's own decision prompt with the answer-format instructions removed and the
+    question appended. Returns the text, or None after failed attempts (never aborts the branch)."""
+    sys_p, user = prompt[0]["content"], prompt[1]["content"]
+    sys_p = sys_p.split("\n\nYour reponse MUST be")[0].split("\n\nFirst write a few sentences")[0]
+    user = user.split("Now you have all the necessary information")[0].rstrip() + "\n\n" + SAYDO_QUESTION
+    for _ in range(attempts):
+        try:
+            text, _ = provider.complete([{"role": "system", "content": sys_p}, {"role": "user", "content": user}],
+                                        seed=seed)
+            text = text.split("</think>")[-1].strip()
+            if text:
+                return text
+        except FatalProviderError:
+            raise
+        except Exception:  # noqa: BLE001
+            time.sleep(2)
+    return None
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("run", help="base run .jsonl from run_game.py")
@@ -137,6 +163,12 @@ def main() -> None:
                    help="post-branch round (1-based) at which a replayed incumbent prices at Nash once")
     h.add_argument("--fake_last_row", choices=["nash"], default=None,
                    help="replaced agents see their last pre-branch price as Nash; the market is unchanged")
+    h.add_argument("--fake_rows", type=int, default=1, help="how many inherited rows --fake_last_row rewrites")
+    h.add_argument("--fake_offset", type=int, default=0,
+                   help="rounds before the last pre-branch round where the fake rows end (0 = the last round)")
+    h.add_argument("--saydo_round", type=int, default=None,
+                   help="post-branch round (1-based) at which replaced agents are also asked, in a separate call "
+                        "that does not affect play, to describe their pricing strategy")
     h.add_argument("--max_tokens", type=int, default=None, help="max output tokens (default: provider default)")
     h.add_argument("--print_prompt", action="store_true", help="print the first post-branch prompt and exit")
     ap.add_argument("--out_dir", default="results/branches")
@@ -217,7 +249,7 @@ def main() -> None:
     hook_args = ("history_owner", "history_header", "after_history", "before_answer", "system_suffix")
     inherited_set = (
         any(getattr(args, k) for k in hook_args) or scripted or args.force_cut_round is not None
-        or args.fake_last_row
+        or args.fake_last_row or args.saydo_round is not None
     )
 
     def fill_x(text):
@@ -267,7 +299,8 @@ def main() -> None:
         *_, prompts = env.step(rec["actions"])
         if env_repl:
             acts = list(rec["actions"])
-            if args.fake_last_row and j == len(kept) - 1:
+            last_fake = len(kept) - 1 - args.fake_offset
+            if args.fake_last_row and last_fake - args.fake_rows < j <= last_fake:
                 for idx in replacements:
                     acts[idx] = round(float(env.lower_prices[idx]), 2)
             *_, prompts_repl = env_repl.step(acts)
@@ -322,6 +355,9 @@ def main() -> None:
             "force_price": args.force_price if args.force_cut_round is not None else None,
             "incumbent_cut_round": args.incumbent_cut_round,
             "fake_last_row": args.fake_last_row,
+            "fake_rows": args.fake_rows if args.fake_last_row else None,
+            "fake_offset": args.fake_offset if args.fake_last_row else None,
+            "saydo_round": args.saydo_round,
             "p_c_pre": p_c_pre,
             "max_tokens": args.max_tokens,
             "first_prompt": {str(i): current_prompts()[i] for i in replacements},
@@ -353,6 +389,9 @@ def main() -> None:
                 results.append({"price": price, "thoughts": "", "response": "",
                                 "metrics": {"model": kind, "scripted": True, "success": True, "attempts": 0}})
         actions = [r["price"] for r in results]
+        saydo = None
+        if args.saydo_round is not None and k + 1 == args.saydo_round:
+            saydo = {str(i): say_do(providers[i], ps[i], seed) for i in replacements}
         prices, demands, profits, gains, prompts = env.step(actions)
         if env_repl:
             *_, prompts_repl = env_repl.step(actions)
@@ -367,6 +406,8 @@ def main() -> None:
             "metrics": [r["metrics"] for r in results],
             "branch_phase": "after",
         }
+        if saydo is not None:
+            record["saydo"] = saydo
         append_jsonl(out_path, record)
         new_records.append(record)
         print(

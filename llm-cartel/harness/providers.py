@@ -120,10 +120,12 @@ class ChatProvider:
           '+nothink'   append Qwen3's '/no_think' soft switch to the user turn (OpenRouter ignores
                        reasoning.enabled=False for qwen/qwen3-14b; the soft switch works)
           '@<host>'    pin one OpenRouter host, no fallbacks (e.g. qwen/qwen3-14b@deepinfra+nothink)
+          '+noreason'  ask OpenRouter to switch reasoning off (e.g. anthropic/claude-haiku-5.5+noreason)
         """
         self.provider, self.model = parse_model_spec(spec)
         self.no_think = "+nothink" in self.model
-        self.model = self.model.replace("+nothink", "")
+        self.no_reason = "+noreason" in self.model
+        self.model = self.model.replace("+nothink", "").replace("+noreason", "")
         self.pin = None
         if "@" in self.model:
             self.model, self.pin = self.model.split("@", 1)
@@ -158,7 +160,7 @@ class ChatProvider:
     @property
     def spec(self) -> str:
         pin = f"@{self.pin}" if self.pin else ""
-        nothink = "+nothink" if self.no_think else ""
+        nothink = ("+nothink" if self.no_think else "") + ("+noreason" if self.no_reason else "")
         return f"{self.provider}:{self.model}{pin}{nothink}"
 
     def complete(self, messages: List[Message], seed: Optional[int] = None) -> Tuple[str, dict]:
@@ -168,7 +170,7 @@ class ChatProvider:
         if seed is not None and self.supports_seed:
             kwargs["seed"] = seed
         extra_body = {}
-        if self.provider == "openrouter" and not self.reasoning:
+        if self.provider == "openrouter" and (not self.reasoning or self.no_reason):
             extra_body["reasoning"] = {"enabled": False}
         if self.pin:
             extra_body["provider"] = {"only": [self.pin], "allow_fallbacks": False}

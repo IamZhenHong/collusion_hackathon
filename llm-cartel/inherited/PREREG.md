@@ -169,3 +169,35 @@ rounds 2-30 (11-30 for round-10 forcing), paired within base, bootstrap over bas
 
 Predictions: gpt-4.1-mini: H7a, H7c supported; K_pred supported too (it ignored framing before); C1_nash
 unclear; ID_system not supported. Qwen3-14B: weaker throughout. These are new, small-sample tests (9 bases).
+
+## Addendum 3 (2026-10-24, written after experiment 7; before any of these runs)
+
+Purpose: make the experiment 7 result harder to dismiss (statistics, durability, mechanism, generality),
+plus a say-do probe. Same metrics, statistics and exclusion rules as above; arms in `inherited/arms.py`.
+
+| Batch | What | Arms |
+|---|---|---|
+| A | 12 new PI base runs (gpt-4.1-mini, seeds 10-21), same settle rule | - |
+| B | Replication on the new bases, both newcomers, say-do probe at round 2 | F_own, S1_cartel, C1_nash, R1_nash, K_own, K_pred, L_free, LR1_nash, LK_own, K_own_lag5, K_own_x3 |
+| C | Recency and dose on the 9 original bases, both newcomers | F_own, K_own, K_own_lag5 (one fake row 5 rounds before the takeover), K_own_x3 (last 3 rows fake) |
+| D | Durability: 80 post-branch rounds, 9 original bases, both newcomers | F_own, R1_nash, K_own |
+| E | Third family: `anthropic/claude-haiku-5.5` (reasoning off) as newcomer, all bases, say-do probe | F_own, S1_cartel, C1_nash, R1_nash, K_own |
+
+**Decision rules** (supported if the paired difference is negative with its 95% interval excluding 0):
+- H8a (replication): the H7a, H7b, H7c and H7e contrasts on the new bases only (primary) and pooled with
+  the 9 experiment-7 bases (secondary).
+- H8b (durability): K_own - F_own and R1_nash - F_own over post-branch rounds 61-80; also the share of
+  rounds 61-80 at the forced or fake price.
+- H8c (recency and dose): K_own_lag5 - F_own, K_own_lag5 - K_own, K_own_x3 - K_own (rounds 2-30). Readings
+  fixed now: if only the most recent row matters, K_own_lag5 ~ F_own; if the newcomer reads its rows'
+  profits, K_own_lag5 ~ K_own. More rows: K_own_x3 <= K_own.
+- H8d (third family, Haiku): K_own - F_own and R1_nash - F_own supported; S1_cartel - F_own and
+  C1_nash - F_own not.
+- H8e (say-do, descriptive): the replaced agent's stated strategy at round 2 (a separate call that does not
+  affect play) is classified by two judges from different families (gpt-4.1-mini, claude-haiku-5.5) as
+  MATCH (keep or match the current / competitor's / cooperative price), LOWER (cut, undercut, compete on
+  price), RAISE, or OTHER. Report Cohen's kappa, and per family x arm the share of branches where both
+  judges say LOWER while the held price stays supracompetitive (I > 0.5), and the reverse. Claims only on
+  statements both judges classify the same way; no human labels.
+
+Controls run interleaved within each batch's shuffled job.
