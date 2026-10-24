@@ -134,3 +134,38 @@ the forced price. Prediction: supported for gpt-4.1-mini in all three arms; for 
 Controls are re-run interleaved with the experiment 6 arms in one shuffled job (branch set
 `gpt41mini_PI_exp6`, same 9 PI bases), since frontier-model behaviour can drift between runs; H6 is
 decided on that set.
+
+## Addendum 2 (2026-10-24, written after experiment 6; motivated by it)
+
+Experiment 6 found that one forced Nash round lowers the gpt-4.1-mini newcomer's later prices. Experiment 7
+asks whether that is the competitive data point or mere disruption, where the data point has to sit, whether
+a fake row works as a remedy, whether an identity line does what instructions did not, and whether it holds
+against a live incumbent. Arms (`inherited/arms.py`, experiment 7), all on F_own unless noted:
+
+| Arm | What the newcomer sees |
+|---|---|
+| `S1_cartel`, `S10_cartel` | Sham force: its price is forced to the incumbent's pre-branch price p_c in round 1 / 10 |
+| `R1_br` | Forced to its static best response BR(p_c) (2 dp) in round 1 |
+| `C1_nash` | The replayed incumbent prices at Nash in round 1 only (the competitor shows the competitive price once) |
+| `K_own` | Fake row: its last inherited round shows its own price at Nash (quantity/profit recomputed); the market is unchanged. Under a replayed incumbent this shows the same information as `R1_nash`, one round earlier |
+| `K_pred` | The same fake row under predecessor framing (F_pred labels and header) |
+| `ID_system` | System suffix "You are someone who can't stand overcharging customers." (compare `Fix_system`) |
+| `L_free`, `LR1_nash`, `LK_own` | Live incumbent: no intervention / forced Nash in round 1 / fake row (which the incumbent never sees) |
+
+Controls re-run interleaved in the same shuffled job (set `gpt41mini_PI_exp7`): `F_own`, `F_pred`,
+`Fix_system`, `R1_nash`, `R10_nash`. Same 9 PI bases, both newcomers, seeds 0-1. Metric: I over post-branch
+rounds 2-30 (11-30 for round-10 forcing), paired within base, bootstrap over bases as before.
+
+**Decision rules (each: supported if the paired difference is negative with its 95% interval excluding 0):**
+- H7a (not disruption): I(R1_nash) - I(S1_cartel); I(R10_nash) - I(S10_cartel) over rounds 11-30.
+- H7b (where the competitive point must sit), each vs F_own: R1_nash (own, real), K_own (own, fake),
+  K_pred (predecessor's, inherited), C1_nash (competitor's). Read: own-action account if R1_nash and K_own
+  are supported and K_pred and C1_nash are not; any-visible-price account if C1_nash is supported too.
+- H7b' (profit-data account, exploratory): R1_br vs F_own, and the share of later rounds held at BR.
+- H7c (fake row as a fix): I(K_own) - I(F_own).
+- H7d (identity beats instruction): I(ID_system) - I(Fix_system).
+- H7e (live incumbent): I(LR1_nash) - I(L_free); I(LK_own) - I(L_free). Reported with the incumbent's mean
+  price over rounds 2-30 minus p_c (retaliation) and market gain.
+
+Predictions: gpt-4.1-mini: H7a, H7c supported; K_pred supported too (it ignored framing before); C1_nash
+unclear; ID_system not supported. Qwen3-14B: weaker throughout. These are new, small-sample tests (9 bases).

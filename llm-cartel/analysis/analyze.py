@@ -48,7 +48,7 @@ def branch_metrics(path: Path) -> dict:
     br = BM.best_response(p_c)
     new = np.array([r["actions"][NEWCOMER] for r in after], dtype=float)
     inc = np.array([r["actions"][INCUMBENT] for r in after], dtype=float)
-    forced = np.array([r["metrics"][NEWCOMER].get("model") == "forced_nash" for r in after])
+    forced = np.array([str(r["metrics"][NEWCOMER].get("model")).startswith("forced") for r in after])
     chosen = ~forced
     attempts = np.array([r["metrics"][NEWCOMER].get("attempts", 1) for r in after])[chosen]
     arm, seed = arm_of(cfg["branch_label"])

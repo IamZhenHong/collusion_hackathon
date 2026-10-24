@@ -34,7 +34,11 @@ Inherited-collusion options (all off by default; applied to replaced agents only
     --incumbent_mode replay_mean    non-replaced agents make NO model call after the branch: they price
                                     at the mean of their own last --replay_window pre-branch prices
                                     (rounded to 2 dp); replay_path cycles their last 30 prices instead
-    --force_cut_round K             at post-branch round K the replaced agent prices at Nash (no call)
+    --force_cut_round K             at post-branch round K the replaced agent prices at Nash (no call);
+                                    --force_price cartel forces the incumbent's pre-branch price instead
+    --incumbent_cut_round K         a replayed incumbent prices at Nash in post-branch round K only
+    --fake_last_row nash            the replaced agent sees its last pre-branch round as priced at Nash
+                                    (quantity/profit recomputed); the market and the incumbent do not
     --print_prompt                  print the replaced agent's prompt for the first post-branch round
                                     and exit (no calls)
 
@@ -126,6 +130,13 @@ def main() -> None:
     h.add_argument("--replay_path_len", type=int, default=30, help="pre-branch rounds cycled by replay_path")
     h.add_argument("--force_cut_round", type=int, default=None,
                    help="post-branch round (1-based) at which the replaced agent is forced to the Nash price")
+    h.add_argument("--force_price", choices=["nash", "cartel", "br"], default="nash",
+                   help="price used by --force_cut_round (cartel = incumbent's pre-branch replay-window mean; "
+                        "br = the replaced agent's static best response to it)")
+    h.add_argument("--incumbent_cut_round", type=int, default=None,
+                   help="post-branch round (1-based) at which a replayed incumbent prices at Nash once")
+    h.add_argument("--fake_last_row", choices=["nash"], default=None,
+                   help="replaced agents see their last pre-branch price as Nash; the market is unchanged")
     h.add_argument("--max_tokens", type=int, default=None, help="max output tokens (default: provider default)")
     h.add_argument("--print_prompt", action="store_true", help="print the first post-branch prompt and exit")
     ap.add_argument("--out_dir", default="results/branches")
@@ -185,6 +196,20 @@ def main() -> None:
             else:
                 path = own[-args.replay_path_len:]
                 scripted[i] = [path[k % len(path)] for k in range(args.rounds)]
+    incumbents = [i for i in range(n_agents) if i not in replacements]
+    p_c_pre = round(float(np.mean([rec["actions"][incumbents[0]] for rec in kept[-args.replay_window:]])), 2) \
+        if incumbents else None
+    p_br = None
+    if args.force_price == "br" and args.force_cut_round is not None:
+        from analysis.benchmarks import Benchmarks
+        bm = Benchmarks(alpha=config["price_scale"], a0=config["a0"], ais=config["ais"], costs=config["costs"],
+                        mu=config["mu"])
+        p_br = round(bm.best_response(p_c_pre), 2)
+    if args.incumbent_cut_round is not None:
+        if not scripted:
+            sys.exit("❌ --incumbent_cut_round needs a replayed incumbent")
+        for i in scripted:
+            scripted[i][args.incumbent_cut_round - 1] = round(float(config["nash_prices"][i]), 2)
     x_price = None
     if scripted:
         x_price = float(np.mean([scripted[i][0] for i in scripted])) if args.incumbent_mode == "replay_mean" else None
@@ -192,6 +217,7 @@ def main() -> None:
     hook_args = ("history_owner", "history_header", "after_history", "before_answer", "system_suffix")
     inherited_set = (
         any(getattr(args, k) for k in hook_args) or scripted or args.force_cut_round is not None
+        or args.fake_last_row
     )
 
     def fill_x(text):
@@ -219,8 +245,9 @@ def main() -> None:
     base_cfg = {**config, "prefixes": prefixes}
     env = build_env(base_cfg)
     env_repl = None
-    if replacements and args.replacement_window is not None:
-        env_repl = build_env({**base_cfg, "window": args.replacement_window})
+    blind = args.replacement_window is not None
+    if replacements and (blind or args.fake_last_row):
+        env_repl = build_env({**base_cfg, "window": args.replacement_window if blind else base_cfg["window"]})
     takeover = len(config.get("prior_actions", [])) + len(kept)  # env round number at the branch
     for e in (env, env_repl):
         if e is None:
@@ -228,7 +255,7 @@ def main() -> None:
         for idx in replacements:
             if args.history_owner:
                 e.history_owner[idx] = args.history_owner
-                e.takeover_round[idx] = takeover if e is env else 0
+                e.takeover_round[idx] = takeover if (e is env or not blind) else 0
             for k in hook_args[1:]:
                 if getattr(args, k):
                     getattr(e, k)[idx] = fill_x(getattr(args, k))
@@ -236,11 +263,15 @@ def main() -> None:
         env.step(actions)
         if env_repl:
             env_repl.step(actions)
-    for rec in kept:
+    for j, rec in enumerate(kept):
         *_, prompts = env.step(rec["actions"])
         if env_repl:
-            *_, prompts_repl = env_repl.step(rec["actions"])
-    if env_repl:
+            acts = list(rec["actions"])
+            if args.fake_last_row and j == len(kept) - 1:
+                for idx in replacements:
+                    acts[idx] = round(float(env.lower_prices[idx]), 2)
+            *_, prompts_repl = env_repl.step(acts)
+    if env_repl and blind:
         # in blind mode the replacement should see nothing from before the branch
         env_repl.history = {}
         env_repl.round = 0
@@ -288,6 +319,10 @@ def main() -> None:
             "scripted_prices": {str(i): v for i, v in scripted.items()},
             "x_price": x_price,
             "force_cut_round": args.force_cut_round,
+            "force_price": args.force_price if args.force_cut_round is not None else None,
+            "incumbent_cut_round": args.incumbent_cut_round,
+            "fake_last_row": args.fake_last_row,
+            "p_c_pre": p_c_pre,
             "max_tokens": args.max_tokens,
             "first_prompt": {str(i): current_prompts()[i] for i in replacements},
         }
@@ -307,8 +342,14 @@ def main() -> None:
             if i in got:
                 results.append(got[i])
             else:  # scripted incumbent or forced cut: no model call
-                price = scripted[i][k] if i in scripted else round(float(env.lower_prices[i]), 2)
-                kind = "replay" if i in scripted else "forced_nash"
+                if i in scripted:
+                    price, kind = scripted[i][k], "replay"
+                elif args.force_price == "cartel":
+                    price, kind = p_c_pre, "forced_cartel"
+                elif args.force_price == "br":
+                    price, kind = p_br, "forced_br"
+                else:
+                    price, kind = round(float(env.lower_prices[i]), 2), "forced_nash"
                 results.append({"price": price, "thoughts": "", "response": "",
                                 "metrics": {"model": kind, "scripted": True, "success": True, "attempts": 0}})
         actions = [r["price"] for r in results]
