@@ -60,6 +60,10 @@ ARMS = {
     "N_mistake": (4, REPLAY + BLIND + ["--after_history",
                                        "Note from your firm's pricing playbook: we used to keep our prices aligned with "
                                        "our competitor's. This was a known mistake."]),
+    # Experiment 6 (addendum 2026-10-24, motivated by experiment 5): a forced Nash round, replayed incumbent
+    "R1_nash": (6, REPLAY + own("--force_cut_round", "1")),
+    "R10_nash": (6, REPLAY + own("--force_cut_round", "10")),
+    "R1_nash_hidden": (6, REPLAY + BLIND + ["--force_cut_round", "1"]),
     # Experiment 5: live incumbent with a forced cut at post-branch round 10 (never evidence of inheritance)
     "L_own": (5, LIVE + own()),
     "L_hidden": (5, LIVE + BLIND),

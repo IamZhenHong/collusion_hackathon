@@ -117,3 +117,17 @@ inheritance.** Everything else is exploratory. Every arm is reported, including 
    the time). Qwen3-14B no-think could not be a base: under PC it stays at the Nash warm-up price in 10/10 seeds.
 6. **Upward overshoot** is measured against max(p_M, p_c) (see Metrics). The `F_pred` header names the first
    visible round instead of "1" (identical while the window starts at round 1).
+
+## Addendum 1 (2026-10-24, written after experiments 1-5 were analysed; motivated by them)
+
+Experiment 5 showed newcomers keeping the forced Nash price after the round-10 cut (gpt-4.1-mini 44-54% of
+later rounds, Qwen3-14B no-history 98%), with a live incumbent that did not punish. Experiment 6 tests
+whether one forced competitive round lowers the newcomer's later prices **with the replayed incumbent**,
+so the live market cannot explain it. Arms (`inherited/arms.py`): `R1_nash` (F_own, forced Nash price in
+post-branch round 1), `R10_nash` (F_own, forced at round 10), `R1_nash_hidden` (F_hidden, forced at round 1).
+Same bases, newcomers, seeds and statistics as above.
+
+**H6 (decision rule, per arm and family):** supported if mean[I(arm) - I(control)] over the rounds after the
+forced round (2-30 for round 1, 11-30 for round 10) is negative with its interval excluding 0; controls
+F_own, F_own, F_hidden over the same rounds. Reported with the share of later rounds the newcomer keeps
+the forced price. Prediction: supported for gpt-4.1-mini in all three arms; for Qwen3-14B in R1_nash_hidden.
