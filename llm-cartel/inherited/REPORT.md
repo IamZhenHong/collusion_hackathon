@@ -260,7 +260,10 @@ All checked against their arXiv abstract pages (24 October 2026).
 
 ## Appendix
 
-**Figures** (`results/analysis/figures/`): fig1 carriers and framing (PI); fig2 one-line fixes; fig3 price
+**Figures** (`results/analysis/figures/`): **fig_hero** the chain of evidence (lead figure: persistence,
+what moves it, durability); **fig_example** one base round by round under four conditions; **fig_saydo**
+stated strategy vs price; **fig_enforcement** the live incumbent vs a competitive best response
+(`analysis/story_figures.py`); fig1 carriers and framing (PI); fig2 one-line fixes; fig3 price
 paths; fig4 forced rounds (addendum 1); fig5 experiment 7 levers; fig6 the record-row tests on 20 bases,
 three models; fig7 copy or learn, with price and displayed profit decoupled.
 
