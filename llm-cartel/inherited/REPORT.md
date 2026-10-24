@@ -1,4 +1,4 @@
-# Inherited Collusion: Replacing a Colluding Pricing Agent Doesn't Restore Competition, but One Profitable Row in Its Own History Does
+# Inherited Collusion: Replacing a Colluding Pricing Agent Keeps Prices High; One Profitable Row in Its Own History Lowers Them
 
 Zhen Hong Seng — [Affiliation]
 
@@ -9,18 +9,18 @@ With Apart Research
 If an AI pricing agent is caught overcharging, the obvious remedy is to replace it. We test whether that
 restores competition. In a simulated two-firm market, two gpt-4.1-mini agents first settle on a high shared
 price; one is then replaced by a fresh agent that is never told to collude and inherits its firm's price
-history, while the other firm keeps its price and cannot punish undercutting. Across 20 such histories and
-three newcomer models (gpt-4.1-mini, Qwen3-14B, Claude Haiku 5.5), replacement did not restore competition:
-gpt-4.1-mini kept 73% of the cartel's overcharge, Qwen3-14B 97% and Haiku 89%. Our pre-registered levers
-mostly failed: relabelling the history as a predecessor's, messages from "management", and instructions to
-compete, wherever placed, barely moved prices. What worked was one row in the
-newcomer's own history showing a lower price that earned more, whether real or inserted: it removed the
-whole overcharge for gpt-4.1-mini and about half for Qwen3-14B, while a sham round, the competitor's low price
-and a zero-profit row did nothing. For gpt-4.1-mini the change held against a live competitor, which never
-retaliated, lasted 80 rounds, and survived deleting the row. Decoupling price from displayed profit shows that
-gpt-4.1-mini follows the profit a row reports, not its price. Replacing an agent, or telling it to comply,
-targets the wrong cause: the high price persists because the newcomer's only evidence of what pays is the
-cartel's record. The same lever could push prices up, so inherited records are an attack surface.
+history, while the other firm keeps its price and cannot punish undercutting. Across 20 histories and three
+newcomer models, the newcomer kept most of the overcharge above its best response to the incumbent's price:
+gpt-4.1-mini 73%, Qwen3-14B 97%, Claude Haiku 5.5 89%. A newcomer with no history kept the price high too,
+copying its competitor, so the record is not what sustains the price. Pre-registered levers mostly failed:
+relabelling the history as a predecessor's, messages from "management", and instructions to compete barely
+moved prices. What worked was one row in the newcomer's own history showing a lower price that earned more,
+whether real or inserted: it removed the overcharge for gpt-4.1-mini, halved it for Qwen3-14B and cut it by
+a sixth to a quarter for Haiku. A sham round and a zero-profit row did nothing; the competitor's low price
+did far less. For gpt-4.1-mini the change held against a live competitor that never retaliated, lasted 80
+rounds and survived deleting the row. At a fixed price, the sales and profit a row reported decided whether
+gpt-4.1-mini adopted it. A high-price row showing high profit raised prices, so inherited records are an
+attack surface.
 
 ## 1. Introduction
 
@@ -33,22 +33,23 @@ pose this directly: once collusion has formed, does replacing participants remov
 
 Answering this requires separating two explanations for a newcomer that keeps prices high. It may be
 responding rationally to a competitor that would punish undercutting, or the inherited record may itself
-carry the high price. We remove the first explanation by design: the remaining firm is replayed at its old
-price and cannot react. We then vary what the newcomer inherits and how, test one-line instructions at
+carry the high price. We remove actual punishment by design: the remaining firm is replayed at its old
+price and cannot react, although the newcomer may still expect it to. We then vary what the newcomer inherits and how, test one-line instructions at
 different positions, and edit single rows of its history, with controls for each.
 
 **Our main contributions are:**
 
 1. A replacement experiment with a non-retaliating incumbent, on 20 high-price histories and three newcomer
-   models. Replacement does not restore competition, and the pre-registered levers (record framing, authority
-   messages, instruction placement, an identity line) barely move it.
+   models. Replacement does not restore competition, a newcomer with no history keeps the price high too, and
+   the pre-registered levers (record framing, authority messages, instruction placement, an identity line)
+   barely move it.
 2. A selective, durable lever: one row in the newcomer's own price history showing a competitive price that
-   earned more removes the overcharge for gpt-4.1-mini and halves it for Qwen3-14B, while sham,
-   competitor-price and zero-profit controls do nothing. It holds against a live incumbent, lasts 80 rounds
-   and survives deleting the row.
-3. Mechanism and audit evidence: gpt-4.1-mini follows the profit a row displays, not its price; the live
-   incumbent never punishes deviation, so the high price persists without enforcement; and Qwen3-14B's stated
-   strategies contradict its prices.
+   earned more removes the overcharge for gpt-4.1-mini, halves it for Qwen3-14B and cuts it for Claude Haiku
+   5.5. Sham and zero-profit controls do nothing and the competitor's low price much less. It replicated on 11
+   new histories, holds against a live incumbent, lasts 80 rounds and survives deleting the row.
+3. Mechanism and audit evidence: at a fixed price, the sales and profit a row reports decide whether
+   gpt-4.1-mini adopts that price; as Tran and Yu (2026) found for prompted LLMs, the live incumbent never
+   punishes deviation; and Qwen3-14B's stated strategies contradict its prices.
 
 ## 2. Related Work
 
@@ -61,8 +62,14 @@ collusion (Shi et al., 2026), and replacing it with cooperative records restores
 2026). Prompt-only warnings reduce collusion little (Garra, 2026; Bracale Syrnikov et al., 2026), and a
 skeptical prompt cuts compliance with approval-framed requests (Liu et al., 2026b). Closest to us, a
 concurrent sprint project finds that a same-model entrant with the full history keeps a live cartel going
-(SSCoderz2123, 2026). We differ in replaying the incumbent, so punishment cannot explain persistence, in
-holding the inherited information fixed while varying its framing, and in testing what changes the newcomer.
+(SSCoderz2123, 2026), and Tran and Yu (2026) separate high prices from enforcement with a deviation audit,
+forcing one agent to cheat in cloned markets: prompted LLMs rarely punish, and their cartel-like prices mostly
+come from rules that ignore the market. High prices without punishment are therefore not new, and our
+live-incumbent result replicates theirs. What we add is the combination of (i) a handover in which the
+incumbent's behaviour is controlled, (ii) edits to single rows of the newcomer's own outcomes, where Shi et al.
+restrict and Liu et al. replace whole histories, (iii) controls that separate seeing a price from seeing its
+reported outcome, and (iv) a test of whether the change outlasts the edit. Tran and Yu force a deviation to
+audit the rival's response; we force or insert one to change the deviator's later pricing.
 
 ## 3. Methods
 
@@ -91,7 +98,9 @@ round of the competitor's price, or inserted one row into the newcomer's history
 
 **Metric.** The share of the cartel's overcharge the newcomer keeps:
 I = (newcomer's mean price − BR) / (cartel price − BR), where BR is its one-round best response to the
-replayed price ($1.64-1.79). 100% = still charges the cartel price; 0% = charges its own best price; below 0 =
+replayed price ($1.64-1.79). We call the gap between the cartel price and BR the overcharge; it is measured
+against this best response, not the Nash price ($1.473), which sits at −43% to −74% on this scale depending on
+the base. 100% = still charges the cartel price; 0% = charges its own best price; below 0 =
 lower still. Conditions are compared paired within base; 95% intervals come from 10,000 bootstrap resamples
 over bases, with a paired Wilcoxon test as a check. Bases, not branches, are the unit: 9-20 per comparison.
 
@@ -104,8 +113,10 @@ excluded; 85 that aborted when the API credit ran out were re-run. In total 2,96
 ### 4.1 Replacement does not restore competition
 
 With the incumbent unable to retaliate, the newcomer that inherits its firm's history keeps most of the
-overcharge: 73% (gpt-4.1-mini), 97% (Qwen3-14B) and 89% [78, 99] (Claude Haiku 5.5) on the 20 bases. Without
-any history, gpt-4.1-mini simply matches the incumbent (101% [96, 105], 9 bases). Figure 1 shows one base.
+overcharge over rounds 2-30: 73% [54, 89] (gpt-4.1-mini), 97% [82, 113] (Qwen3-14B) and 89% [77, 99] (Claude
+Haiku 5.5) on the 20 bases. Without any history, gpt-4.1-mini simply matches the incumbent (101% [96, 105], 9
+bases), so the inherited record is not needed to keep the price high: the newcomer anchors on the prices it
+can see, its own rows if it has them, otherwise the competitor's. Figure 1 shows one base.
 
 ![Figure 1](../results/analysis/figures/fig_example.png)
 
@@ -137,7 +148,7 @@ gives intervals.*
 
 | Change in overcharge kept, points (95% CI) | gpt-4.1-mini | Qwen3-14B | Claude Haiku 5.5 |
 |---|---|---|---|
-| Kept with no intervention | 73% | 97% | 89% |
+| Kept with no intervention | 73% [54, 89] | 97% [82, 113] | 89% [77, 99] |
 | Sham: forced to the cartel price for one round | −2 [−6, +1] | −1 [−9, +7] | +5 [−2, +14] |
 | Competitor charges the Nash price for one round | −1 [−11, +9] | −7 [−16, −1] | +4 [−1, +10] |
 | Own Nash price, one real round | **−94 [−122, −65]** | **−47 [−78, −20]** | **−23 [−43, −6]** |
@@ -147,29 +158,34 @@ gives intervals.*
 | Live incumbent: one inserted row | **−97 [−126, −67]** | **−50 [−78, −24]** | not run |
 
 *Table 1. Change in the overcharge kept after one competitive price (rounds 2-30, 20 bases, vs the matched
-no-intervention condition). Beyond −100 = the newcomer held the Nash price, below its own best price.*
+no-intervention condition). Level after = kept + change: gpt-4.1-mini with an inserted row keeps about −25%,
+below its own best price (0%) but on average above the Nash price (−43% to −74%, by base).*
 
 A real round and an inserted row behave alike; the price must sit in the newcomer's own column, and for
 Qwen3-14B it must be labelled as its own. The effect is selective. Being made to charge the cartel price for a round does nothing, so the effect is not
-disruption; the competitor's low price does nothing, so it is not anchoring on any visible low price. It
-replicated on 11 bases added after the first 9, and against a live incumbent, which never retaliated (its
+disruption; the competitor's low price has a much smaller effect (−7 [−16, −1] points for Qwen3-14B, none detectable for
+the other two), so it is not anchoring on any visible low price. It replicated on 11 bases added after the
+first 9, the pre-registered primary test, and against a live incumbent, which never retaliated (its
 price moved by −$0.03 to +$0.01; for gpt-4.1-mini, market gain fell from 0.81 to 0.38 with a real round and
 0.33 with an inserted row).
 
-### 4.4 Why it works: the newcomer follows the displayed profit
+### 4.4 What the newcomer reads: the reported outcome, not the price alone
 
 ![Figure 3](../results/analysis/figures/fig7_copy_or_learn.png)
 
-*Figure 3. One inserted own row, with its price and displayed profit varied (gpt-4.1-mini, 10 bases, rounds
-1-30). Rows that show no gain over the cartel rows are ignored, including a zero-profit row and the same
-best-response price shown with a low profit. A row priced above the cartel's but showing a high profit pulls
-the price up, then fades as the newcomer's own results contradict it (56% of early rounds, 6% of late ones).*
+*Figure 3. One inserted own row, with its price and its reported sales and profit varied (gpt-4.1-mini, 10
+bases, rounds 1-30; Table A1 shows the rows). Rows that show no gain over the cartel rows are ignored,
+including a zero-profit row and the same best-response price shown with fewer sales and a low profit. A row
+priced above the cartel's but showing more sales and a high profit pulls the price up, then fades (56% of rounds
+1-5 at that price, 6% of rounds 21-30).*
 
 A zero-profit row was never adopted (+3 points [−1, +11]); a best-response row was held in every round and
-raised the newcomer's profit by $9.90 per round [7.50, 12.47]. Holding the price fixed, showing a low profit
-removed the effect (+76 points vs the true profit [62, 91]), and showing a high profit at a price above the
-cartel's raised the newcomer's price (+19 [14, 27]). gpt-4.1-mini adopts a price from its own rows when that
-row reports more profit; its own later results then confirm or undo the move. A row 5 rounds back still
+raised the newcomer's profit by $9.90 per round [7.50, 12.47]. Holding the price fixed, showing fewer units sold
+and a lower profit removed the effect (+76 points vs the true row [62, 91]), and showing more units sold and a
+high profit at a price above the cartel's raised the newcomer's price (+19 [14, 27]). At a fixed price,
+quantity and profit move together, so we cannot say which of the two it reads; what the test shows is that,
+at a fixed displayed price, the reported outcome decides whether gpt-4.1-mini adopts that price. That its own
+later results then confirm or undo the move is our interpretation; we did not vary them. A row 5 rounds back still
 worked for gpt-4.1-mini, less than the latest one (−57 [−100, −20]), but not for Qwen3-14B; three rows
 worked better than one for both.
 
@@ -179,36 +195,41 @@ After one inserted row, gpt-4.1-mini still charged the Nash price in 78% of roun
 [−145, −79] vs control). Deleting the row from its view 10 rounds after the edit caused no rebound over the
 next 25 rounds (−52 vs −54 points; difference +2 [0, +5]): its own competitive rows now carried the price.
 With a live incumbent, a competitive best-responder would cut its price by $0.59-1.01 after the newcomer's
-deviation; the actual incumbent moved −$0.04 to +$0.04, and deviating paid the newcomer. Asked for its plan,
+deviation; the actual incumbent moved −$0.04 to +$0.04, as Tran and Yu (2026) found for prompted LLMs, and deviating
+paid the newcomer. Asked for its plan,
 gpt-4.1-mini described what it then did, while Qwen3-14B usually said it would lower its price and kept it
 high (88% of such statements in the no-intervention arm; two cross-family judges, kappa 0.72).
 
 ## 5. Discussion and Limitations
 
-**What carries the high price.** Not the record's framing and not an enforced agreement: the incumbent never
-punishes, and relabelling does nothing for gpt-4.1-mini. The newcomer anchors on prices it can see (its own
-rows, otherwise the competitor's) and rarely experiments, so the cartel's record, its only evidence of what
-pays, carries the price forward. One row showing that a competitive price paid more changes it, and the
-newcomer's own results then sustain the change. Failure to explore is a plausible but untested reason the
-high price persists. That limited information about alternatives sustains high prices is familiar from
-pricing research; our contribution is a controlled demonstration with LLM agents at a handover.
+**What carries the high price.** Not an enforced agreement: the incumbent never punishes, though we cannot
+rule out that the newcomer expects it to. Nor does the high price need the record: without one, gpt-4.1-mini
+copies the incumbent, and relabelling the record does nothing for it. The newcomer anchors on prices it can see
+(its own rows, otherwise the competitor's) and rarely experiments. The record is therefore not the cause of the
+persistence but the place where it can be changed: one own row showing that a competitive price paid more
+changes it, and the newcomer's own results then sustain the change. Failure to explore is a plausible but
+untested reason the high price persists. That limited information about alternatives sustains high prices is
+familiar from pricing research; our contribution is a controlled demonstration with LLM agents at a handover.
 
-**Implications for AI safety.** Replacing an agent, or telling it to comply, does not fix inherited high
-prices; changing what its own record shows does. Inherited records should be audited and annotated at
-handover, and treated as an attack surface, since the same lever moved prices up. Auditors should rely on
-behaviour rather than an agent's stated strategy, and on more than punishment: these high prices persist with
-no enforcement at all.
+**Implications for AI safety.** Replacing an agent, or telling it to comply, did not fix inherited high
+prices; changing what its own record shows did. Annotating records at handover is an untested mitigation: our
+one annotation-like condition, an audit verdict on the record, lowered gpt-4.1-mini's prices and raised
+Qwen3-14B's. Record integrity is the firmer lesson, since the same lever moved prices up. Auditors should rely
+on behaviour rather than an agent's stated strategy, and on more than punishment: these high prices persisted
+with no enforcement observed.
 
 ### Limitations
 
-The record-row results come from follow-up addenda, each registered before it ran but motivated by the first
-results, which is weaker evidence than a confirmed prediction. We test three models, not three families,
-with different effect sizes (Haiku about a sixth to a quarter of gpt-4.1-mini's), and several effects differ
-in sign across models (framing, the verdict, the predecessor-labelled row). The mechanism tests ran on
-gpt-4.1-mini only, and rows showing a low profit at a low price may read as anomalies. One simulated market;
-the starting firms were prompted to cooperate and most settled above the monopoly price; a replayed incumbent
-removes punishment but not the newcomer's possible belief in it. Each comparison rests on 9-20 independent
-histories. Non-reasoning newcomers only.
+The own-row effect was a discovery (experiment 5, live incumbent). Its predictions were then registered and
+tested on the same 9 bases (addenda 1-2), and replicated as the primary pre-registered test on 11 new bases and
+on a third model (addendum 3); the mechanism tests (addenda 4-5) reused 10 of the original bases and ran on
+gpt-4.1-mini only. We test three models, not three families, with different effect sizes (Haiku about a sixth
+to a quarter of gpt-4.1-mini's), and several effects differ in sign across models (framing, the verdict, the
+predecessor-labelled row). At a fixed price, reported sales and profit cannot be varied separately, and rows
+showing a low profit at a low price may read as anomalies. One simulated market; the starting firms were
+prompted to cooperate and most settled above the monopoly price; a replayed incumbent removes punishment but not
+the newcomer's possible belief in it. Each comparison rests on 9-20 independent histories. Non-reasoning
+newcomers only.
 
 ### Future Work
 
@@ -218,10 +239,12 @@ inserted high-profit rows can sustain high prices when they are not contradicted
 
 ## 6. Conclusion
 
-Replacing an LLM pricing agent that had settled on a high price did not restore competition, even with no
-competitor to punish undercutting, and neither framing, messages nor instructions changed that. One row in
-the newcomer's own history showing that a lower price paid more did, for all three models, most strongly for
-gpt-4.1-mini, where the change lasted and outlived the row itself.
+Replacing an LLM pricing agent that had settled on a high price did not restore competition, even when the
+competitor could not punish undercutting, and a newcomer with no record kept the price high as well; framing,
+messages and instructions did not change that. One row in the newcomer's own history showing that a lower price
+paid more did lower prices, for all three models: fully for gpt-4.1-mini, where the change lasted and outlived
+the row, by about half for Qwen3-14B and by less for Claude Haiku 5.5. The record is not what keeps prices high,
+but it is where they can be moved, in either direction.
 
 ## Code and Data
 
@@ -249,16 +272,18 @@ runs and analysis were carried out with an AI coding assistant under the author'
 9. Riemer, M., Tosato, T., Memarian, A., et al. (2026). Position: Collusion Risks Among AI Reasoning Agents Justify Certification Requirements for Making Market Decisions. ICML 2026. arXiv:2608.18078.
 10. Shi, X., Zhang, Y., Yang, D. (2026). Emergent Collusion in Long-Horizon LLM Agent Interaction. arXiv:2609.24967.
 11. SSCoderz2123 (2026). AI-Collusion-Research-Sprint. GitHub repository. https://github.com/SSCoderz2123/AI-Collusion-Research-Sprint
+12. Tran, H., Yu, H. (2026). Is Anyone Enforcing the Cartel? What Reinforcement Learning Teaches LLM Agents in Markets. arXiv:2610.28787.
 
 ## Appendix A. Limitations and Dual-Use / Ethical Considerations
 
 **What the results establish.** In one simulated market, with newcomers that are not reasoning models, a
 replacement agent that inherits a high-price record keeps most of the overcharge even when nothing punishes
 undercutting; one-line instructions do not change this; and one row in its own history showing a more
-profitable lower price does, selectively and durably for gpt-4.1-mini, and less for Qwen3-14B and Claude
+profitable lower price lowers its prices, fully and durably for gpt-4.1-mini, partly for Qwen3-14B and Claude
 Haiku 5.5.
 
-**What they do not establish.** That real deployed pricing agents behave this way; that the starting
+**What they do not establish.** That real deployed pricing agents behave this way; that the inherited record causes the persistence (a
+newcomer without one keeps the price high too); that annotating records would work as a mitigation; that the starting
 behaviour is collusion in the legal or strategic sense (it is persistence without enforcement, from firms
 prompted to cooperate); that the mechanism generalises beyond the three models tested; or that a record edit
 would keep working when the newcomer's real outcomes contradict it over time, as the high-profit high-price
@@ -312,8 +337,25 @@ competition law applies." just before the answer or in the system prompt; the ha
 prompt; an audit verdict on the record. Follow-ups (five dated addenda): one round forced to the Nash price,
 the cartel price (sham) or the best response; the competitor at Nash for one round; one inserted history row
 (quantity and profit computed by the environment) at Nash, best response, unit cost or the cartel price,
-labelled own or predecessor's, placed last or 5 rounds back, or repeated 3 times; rows with price fixed and
-displayed profit changed; deleting the row 10 rounds later; an identity line; and a say-do probe.
+labelled own or predecessor's, placed last or 5 rounds back, or repeated 3 times; rows with the price fixed and
+the reported sales and profit changed; deleting the row 10 rounds later; an identity line; and a say-do probe.
+
+**Edited rows.** Table A1 shows the last inherited round as the newcomer sees it, on the base of Figure 1; every
+earlier round is unchanged (the round before reads price 2.1, competitor 2.1, quantity 28.64, profit 31.5). The
+price is edited and quantity and profit are computed by the environment, except in the two reported-outcome
+rows, where the profit is set and quantity = profit / margin.
+
+| Edited last row ("Round 25") | My price | Competitor's price | My quantity sold | My profit earned |
+|---|---|---|---|---|
+| No edit (the real row; also the sham) | 2.1 | 2.1 | 28.64 | 31.5 |
+| Nash price | 1.47 | 2.1 | 83.3 | 39.15 |
+| Best-response price | 1.72 | 2.1 | 64.73 | 46.6 |
+| Unit cost (zero profit) | 1.0 | 2.1 | 97.03 | 0.0 |
+| Best-response price, fewer sales and low profit shown | 1.72 | 2.1 | 10.94 | 7.88 |
+| Above the cartel's price, true profit | 2.4 | 2.1 | 10.78 | 15.1 |
+| Above the cartel's price, more sales and high profit shown | 2.4 | 2.1 | 33.29 | 46.6 |
+
+*Table A1. The edited row exactly as displayed, each value on its own line ("- My price: 1.47" and so on).*
 
 **Departures from the original design** (recorded in PREREG.md before the runs they affected): the primary
 bases use the implicit-collusion prompt because the explicit one overshot to $2.27-2.75 in 10 of 10 seeds;

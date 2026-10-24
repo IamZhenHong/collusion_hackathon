@@ -641,9 +641,9 @@ def figure_copy_learn(df: pd.DataFrame):
             ("Unit cost, zero profit", "gpt41mini_PI_exp9", "K_own_cost"),
             ("Nash price, true profit (above the cartel rows')", "gpt41mini_PI_exp9", "K_own"),
             ("Best-response price, true profit (the highest)", "gpt41mini_PI_exp10", "K_own_br"),
-            ("Best-response price, low displayed profit", "gpt41mini_PI_exp10", "K_br_low"),
+            ("Best-response price, fewer sales and low profit shown", "gpt41mini_PI_exp10", "K_br_low"),
             ("Price above the cartel's, true (low) profit", "gpt41mini_PI_exp10", "K_up_true"),
-            ("Price above the cartel's, high displayed profit", "gpt41mini_PI_exp10", "K_up_high")]
+            ("Price above the cartel's, more sales and high profit shown", "gpt41mini_PI_exp10", "K_up_high")]
     d0 = df[df.newcomer == "openai-gpt-4p1-mini"]
     fig, ax = plt.subplots(figsize=(8.8, 0.46 * len(rows) + 1.5), facecolor=SURFACE)
     style(ax)
@@ -653,19 +653,21 @@ def figure_copy_learn(df: pd.DataFrame):
         if arm not in P.t.columns:
             continue
         pt, ci, _ = P.stat(lambda d, a=arm: d[a] - d["F_own"], [arm, "F_own"])
+        pt, ci = 100 * pt, [100 * c for c in ci]  # points, as in the report's Table 1
         ax.plot(ci, [i, i], color=SERIES[0], linewidth=2, solid_capstyle="round")
         ax.plot(pt, i, "o", color=SERIES[0], markersize=7, markeredgecolor=SURFACE, markeredgewidth=1.5)
         g = dd[dd.arm == arm]
-        ax.annotate(f"{g['copy_1_5'].mean():.0%} / {g['copy_21_30'].mean():.0%} of rounds at this price",
+        ax.annotate(f"{g['copy_1_5'].mean():.0%} / {g['copy_21_30'].mean():.0%}",
                     (max(ci[1], pt), i), xytext=(8, 0), textcoords="offset points", va="center", fontsize=8, color=INK2)
     ax.axvline(0, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
     ax.axhline(3.5, color=GRID, linewidth=1.5)
     ax.set_yticks(range(len(rows)), [r[0] for r in rows], color=INK)
     ax.invert_yaxis()
-    ax.set_xlim(-1.7, 1.75)
-    ax.set_xlabel("Change in inheritance index vs F_own, rounds 1-30 (95% CI over 10 bases)\n"
-                  "labels: share of rounds 1-5 / 21-30 priced at the fake row's price", color=INK2)
-    ax.set_title("gpt-4.1-mini follows the displayed profit, not the price", color=INK, loc="left", fontsize=11)
+    ax.set_xlim(-170, 175)
+    ax.set_xlabel("Change in overcharge kept vs no edit, points (95% CI)\n"
+                  "labels: % of rounds 1-5 / 21-30 at the edited row's price", color=INK2)
+    fig.suptitle("At a fixed price, the reported sales and profit decide whether gpt-4.1-mini adopts it",
+                 x=0.012, ha="left", color=INK, fontsize=11)
     fig.tight_layout()
     fig.savefig(OUT / "figures" / "fig7_copy_or_learn.png", dpi=200)
     plt.close(fig)
