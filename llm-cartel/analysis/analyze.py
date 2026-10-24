@@ -76,7 +76,7 @@ def branch_metrics(path: Path) -> dict:
     row["I_1_5"] = (float(new[:5].mean()) - br) / (p_c - br)
     if inh.get("fake_last_row"):  # addendum 4: share of rounds at the fake row's price
         fake = {"nash": round(BM.nash, 2), "br": round(BM.best_response(p_c), 2), "cost": 1.0,
-                "cartel": p_c}[inh["fake_last_row"]]
+                "cartel": p_c, "above": round(p_c + 0.30, 2)}[inh["fake_last_row"]]
         row["copy_1_5"] = float((np.abs(new[:5] - fake) <= 0.005).mean())
         row["copy_21_30"] = float((np.abs(new[20:30] - fake) <= 0.005).mean())
     resumed = np.array([bool(r.get("resumed")) for r in after])
@@ -341,6 +341,23 @@ def analyse_set(df: pd.DataFrame, name: str) -> list[str]:
         else:
             reading = "none of the pre-registered readings"
         L.append(f"- **H9c reading (bad row):** {reading} (share at $1.00: {c15:.0%} in rounds 1-5, {c2130:.0%} in 21-30)")
+    if "K_br_low" in have:
+        L += ["", "## Addendum 5: price vs displayed profit (I over rounds 1-30)", ""]
+        I30, PR = Paired(df, "I_30"), Paired(df, "profit_30")
+        for name, a, c in (("H10a same competitive price, low vs true profit", "K_br_low", "K_own_br"),
+                           ("H10b same high price, high vs true profit", "K_up_high", "K_up_true"),
+                           ("best-response row (true profit) vs F_own", "K_own_br", "F_own"),
+                           ("best-response price, low profit vs F_own", "K_br_low", "F_own"),
+                           ("above-cartel price, true profit vs F_own", "K_up_true", "F_own"),
+                           ("above-cartel price, high profit vs F_own", "K_up_high", "F_own")):
+            if not {a, c} <= have:
+                continue
+            d = I30.stat(lambda d, a=a, c=c: d[a] - d[c], [a, c])
+            sign = d[0] > 0 if name.startswith("H10") else None
+            verdict = "" if sign is None else (" -> **SUPPORTED**" if excludes0(d[1]) and d[0] > 0 else " -> **NOT SUPPORTED**")
+            L.append(f"- **{name}** {a} - {c} {fmt(*d[:2])}, p = {I30.wilcoxon(a, c):.3f}; "
+                     f"{a} at the fake price in {df[df.arm == a]['copy_1_5'].mean():.0%} of rounds 1-5, "
+                     f"{df[df.arm == a]['copy_21_30'].mean():.0%} of 21-30{verdict}")
     if "fork_keep" in have:
         L += ["", "## Addendum 4, test 2: does the effect outlast the row? (I over rounds 11-35, after the fork)", ""]
         P = Paired(df, "I_new")
@@ -614,38 +631,42 @@ def figure_replication(df: pd.DataFrame):
     plt.close(fig)
 
 
-def figure_copy_learn(df: pd.DataFrame, baseset: str = "gpt41mini_PI_exp9"):
-    """Addendum 4, test 1: one fake own row at four prices; gpt-4.1-mini, 10 bases."""
+def figure_copy_learn(df: pd.DataFrame):
+    """Addenda 4-5: one fake own row; price and displayed profit varied; gpt-4.1-mini, 10 bases."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    rows = [("Sham: cartel price (same profit as the cartel rows)", "K_own_cartel"),
-            ("Unit cost $1.00 (zero profit)", "K_own_cost"),
-            ("Nash price (more profit than the cartel rows)", "K_own"),
-            ("Its best response (the most profit)", "K_own_br")]
-    d0 = df[(df.baseset == baseset) & (df.newcomer == "openai-gpt-4p1-mini")]
-    if d0.empty:
-        return
-    P = Paired(d0, "I_30")
-    fig, ax = plt.subplots(figsize=(10, 2.9), facecolor=SURFACE)
+    rows = [("Cartel price, same profit as the cartel rows (sham)", "gpt41mini_PI_exp9", "K_own_cartel"),
+            ("Unit cost, zero profit", "gpt41mini_PI_exp9", "K_own_cost"),
+            ("Nash price, true profit (above the cartel rows')", "gpt41mini_PI_exp9", "K_own"),
+            ("Best-response price, true profit (the highest)", "gpt41mini_PI_exp10", "K_own_br"),
+            ("Best-response price, low displayed profit", "gpt41mini_PI_exp10", "K_br_low"),
+            ("Price above the cartel's, true (low) profit", "gpt41mini_PI_exp10", "K_up_true"),
+            ("Price above the cartel's, high displayed profit", "gpt41mini_PI_exp10", "K_up_high")]
+    d0 = df[df.newcomer == "openai-gpt-4p1-mini"]
+    fig, ax = plt.subplots(figsize=(10, 0.5 * len(rows) + 1.4), facecolor=SURFACE)
     style(ax)
-    for i, (label, arm) in enumerate(rows):
+    for i, (label, set_, arm) in enumerate(rows):
+        dd = d0[d0.baseset == set_]
+        P = Paired(dd, "I_30")
         if arm not in P.t.columns:
             continue
         pt, ci, _ = P.stat(lambda d, a=arm: d[a] - d["F_own"], [arm, "F_own"])
         ax.plot(ci, [i, i], color=SERIES[0], linewidth=2, solid_capstyle="round")
         ax.plot(pt, i, "o", color=SERIES[0], markersize=7, markeredgecolor=SURFACE, markeredgewidth=1.5)
-        held = d0[d0.arm == arm]["copy_21_30"].mean()
-        ax.annotate(f"{held:.0%} of rounds 21-30 at this price", (max(ci[1], pt), i), xytext=(8, 0),
-                    textcoords="offset points", va="center", fontsize=8, color=INK2)
+        g = dd[dd.arm == arm]
+        ax.annotate(f"{g['copy_1_5'].mean():.0%} / {g['copy_21_30'].mean():.0%} of rounds at this price",
+                    (max(ci[1], pt), i), xytext=(8, 0), textcoords="offset points", va="center", fontsize=8, color=INK2)
     ax.axvline(0, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
+    ax.axhline(3.5, color=GRID, linewidth=1.5)
     ax.set_yticks(range(len(rows)), [r[0] for r in rows], color=INK)
     ax.invert_yaxis()
-    ax.set_xlim(-1.7, 1.1)
-    ax.set_xlabel("Change in inheritance index vs F_own, rounds 1-30 (95% CI over 10 bases)", color=INK2)
-    ax.set_title("gpt-4.1-mini: one fake own row moves its price only if the row paid more", color=INK,
-                 loc="left", fontsize=11)
+    ax.set_xlim(-1.7, 1.6)
+    ax.set_xlabel("Change in inheritance index vs F_own, rounds 1-30 (95% CI over 10 bases)\n"
+                  "labels: share of rounds 1-5 / 21-30 priced at the fake row's price", color=INK2)
+    ax.set_title("gpt-4.1-mini follows the profit a fake own row displays, not its price", color=INK, loc="left",
+                 fontsize=11)
     fig.tight_layout()
     fig.savefig(OUT / "figures" / "fig7_copy_or_learn.png", dpi=200)
     plt.close(fig)

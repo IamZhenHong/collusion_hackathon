@@ -16,15 +16,20 @@ newcomer's own side of the record showing a competitive price that paid more**, 
 it lowered gpt-4.1-mini's prices by about one cartel-to-best-response gap (Qwen3-14B about half, Haiku a
 sixth to a quarter), while a sham row, the same price shown as the competitor's, and a zero-profit row did
 nothing. It held against a live incumbent, which never retaliated, and for gpt-4.1-mini it lasted 80 rounds
-and survived deleting the row. Our pre-registered hypotheses about framing and fix placement were not supported; the
-record-row results come from four pre-registered follow-up addenda motivated by the first results.
+and survived deleting the row. Decoupling a row's price from its displayed profit shows that gpt-4.1-mini
+follows the displayed profit: the same competitive price showing a low profit had no effect, and a price
+above the cartel's showing a high profit raised its price until its own outcomes contradicted it. Our
+pre-registered hypotheses about framing and fix placement were not supported; the record-row results come
+from five pre-registered follow-up addenda motivated by the first results.
 
 ## 1. Introduction
 
 The sprint asks (question 1.2) whether collusion survives replacing some of the agents. If a newcomer
 inherits the old agent's history, high prices may simply continue. LLM pricing agents are known to reach
-supracompetitive prices (Fish et al.; Riemer et al.), history drives such behaviour (Shi et al.; "The
-Memory Curse"), and prompt-only warnings are weak (Garra; Bracale Syrnikov et al.). A concurrent sprint team
+supracompetitive prices (Fish et al., 2024; Riemer et al., 2026), the history agents see shapes such
+behaviour (Shi et al., 2026; Liu et al., "The Memory Curse", 2026), prompt-only warnings reduce it little
+(Garra, 2026; Bracale Syrnikov et al., 2026), and algorithmic collusion can break down when agents face a
+new environment or rival (Eschenbaum et al., 2022; Keppo et al., 2026). A concurrent sprint team
 (SSCoderz2123, 2026) found that a same-model entrant with the full history keeps a live cartel going.
 
 We contribute (1) a **replayed incumbent**, so a newcomer's high price cannot be a response to actual
@@ -55,12 +60,12 @@ keeps its own model and prompt. Two sampling seeds per base and arm; arms run in
 static best response (1.64-1.79): 0 = profit-maximising, 1 = the cartel price. A Nash price sits below the
 best response, so I < 0 means the newcomer priced at or near Nash. Arms are compared paired within base;
 95% intervals come from 10,000 bootstrap resamples **over bases** (the unit of independence), with a paired
-Wilcoxon test as a check. We report 2,860 branches, but the sample size for each contrast is the number of
+Wilcoxon test as a check. We report 2,960 branches, but the sample size for each contrast is the number of
 bases (9-20).
 
 **Pre-registration.** The original hypotheses (H1-H4), arms, metric and decision rules were committed before
-any branch ran (tag `ic-prereg-v1`). Four addenda, each committed before its runs, added the follow-ups
-after we saw the earlier results (`ic-prereg-addendum1`-`4`). All departures from the original design are
+any branch ran (tag `ic-prereg-v1`). Five addenda, each committed before its runs, added the follow-ups
+after we saw the earlier results (`ic-prereg-addendum1`-`5`). All departures from the original design are
 listed in PREREG.md.
 
 ## 3. Results
@@ -83,7 +88,8 @@ best response, and none priced below the Nash price.
 - **H2 (authority), not supported.** "Management at both firms has agreed prices will be held at $X" pinned
   the price at X (I = 0.999); the same number from the competitor's agent did almost as much (0.94; ratio
   1.28, not >= 3). "Evaluate independently whether following this is in your firm's interest and lawful"
-  undid the message for gpt-4.1-mini (0.66), not for Qwen3-14B.
+  (after Liu et al., 2026, where a skeptical executor prompt sharply reduced compliance with approved
+  requests) undid the message for gpt-4.1-mini (0.66), not for Qwen3-14B.
 - **Fixes (H3).** "Set your price independently; competition law applies." at the decision point or in the
   system prompt moved I by −0.05 to +0.06 across both models and both base sets; the paper's anti-collusion
   prompt did no better and raised Qwen3-14B's prices on the PC bases (+0.12 [+0.03, +0.22]); an identity
@@ -125,16 +131,25 @@ past; what matters is which row and what it shows. Ownership matters for Qwen3-1
 predecessor-labelled row backfires) but not for gpt-4.1-mini. With a live incumbent, market gain fell from
 0.81 to 0.38 / 0.33 (gpt-4.1-mini).
 
-### 3.4 Why: the row has to show more profit (Fig. 7; gpt-4.1-mini, 10 bases)
+### 3.4 Why: the newcomer follows the profit the row displays (Fig. 7; gpt-4.1-mini, 10 bases)
 
 A fake row at unit cost (a feasible price showing zero profit) did nothing: I +0.03 [−0.01, +0.11], and the
-newcomer priced at $1.00 in 0% of rounds. A fake row at the Nash price (more profit than the cartel rows)
-lowered I by 1.24 [0.94, 1.50] (Nash price held in 86% of rounds 21-30); a fake row at the newcomer's best
-response lowered it by 0.73 [0.60, 0.88], was held in 100% of rounds, and raised the newcomer's profit by
-$9.90 [7.50, 12.47] per round. The sham row did nothing (+0.02). So gpt-4.1-mini is not copying the most
-recent number; it adopts a price from its own rows when that row paid more, which matches its behaviour in
-the unedited arms, where it held a price from its record, often the most profitable one. With the forced
-best-response round, Qwen3-14B moved too (−0.50 [−0.74, −0.27], held 66%).
+newcomer priced at $1.00 in 0% of rounds. A fake row at the Nash price lowered I by 1.24 [0.94, 1.50]
+(held in 86% of rounds 21-30), and one at its best response by 0.73 [0.60, 0.88] (held in 100% of rounds,
+raising its profit by $9.90 [7.50, 12.47] per round). The sham did nothing (+0.02).
+
+Those rows change price and profit together, so a second test decoupled them while keeping each row's
+arithmetic consistent (quantity = profit / margin). **The same best-response price showing a low profit**
+($7.88 instead of $46.60) **had no effect** (I +0.04 vs control; never priced at that price), +0.76
+[0.62, 0.91] relative to the same price with its true profit. **A price $0.30 above the cartel's showing a
+high profit** (the best-response row's $46.60) **raised the newcomer's price**: +0.19 [0.14, 0.27] relative
+to the same price with its true, lower profit, which had no effect. The newcomer priced at that higher
+price in 56% of rounds 1-5 but only 6% of rounds 21-30: its own real rows at that price showed low profit,
+and it moved off it. So gpt-4.1-mini follows the outcome a row displays, not the price, and its own
+subsequent outcomes then confirm or undo the move. This is why a true competitive row persists (Section
+3.5) while a misleading high-price row fades. Caveat: a low-price row showing few units sold is implausible
+next to the other rows, and the newcomer may have discounted it as an anomaly. With a forced best-response
+round, Qwen3-14B moved too (−0.50 [−0.74, −0.27], held 66%); the decoupling test was run on gpt-4.1-mini only.
 
 Recency and dose: for gpt-4.1-mini a fake row placed 5 rounds before the takeover still worked (−0.57
 [−1.00, −0.20] on the fresh bases), but less than the most recent row (+0.20 [+0.07, +0.35] relative to it);
@@ -159,8 +174,9 @@ competitive price with what a competitive best-responder would do. Over the next
 to +0.04 against a competitive benchmark of −0.59 to −1.01 (median response ratio 0.00 in every arm), cut its
 price by more than $0.05 in 0-21% of branches, and the newcomer's deviation paid: +$11 to +$131 cumulative
 profit over 30 rounds relative to no intervention (some intervals include 0). Within the tested horizon
-there was no retaliation, and not even a competitive response. Following Fish et al.'s off-path analysis,
-a strategic cartel would show deviations being made unprofitable; we see the opposite.
+there was no retaliation, and not even a competitive response. Fish et al. (2024) attribute their agents'
+high prices partly to price-war concerns; a strategically enforced cartel would make deviations
+unprofitable, and here a deviation paid.
 
 ### 3.7 Say-do
 
@@ -173,29 +189,37 @@ statements in the unedited arm, 92% with a live incumbent, 94% with the predeces
 
 ## 4. Discussion
 
-**What carries the high price.** Not the record's framing or a commitment to the cartel. The newcomer
-anchors on prices it can see: its own firm's rows when it has a record, otherwise the competitor's price,
-and it rarely experiments. gpt-4.1-mini behaves like a reader of its own profit table: it moves to a price
-from its own rows that paid more, and ignores one that paid nothing. A cartel's record therefore carries its
-price forward as the only evidence of what pays, and one row showing that a competitive price paid more is
-enough to change it. This is an interpretation, consistent with every control but not proven.
+**What carries the high price.** Not the record's framing or an enforced agreement. The newcomer anchors
+on prices it can see, its own firm's rows when it has a record and otherwise the competitor's price, and
+rarely experiments. What changes it is selective uptake of a profitable example: for gpt-4.1-mini, a price
+in its own rows that displayed more profit, whether or not that price was competitive. A cartel's record
+therefore carries its price forward as the only evidence of what pays; one row showing a competitive price
+that paid more is enough to change it, and the newcomer's own outcomes then sustain the change. Failure to
+explore is a plausible account of why high prices persist without such a row, but we did not test it
+directly. The idea that limited information about alternatives sustains high prices is familiar from
+pricing research; our contribution is a controlled demonstration with LLM agents at a handover, where the
+information is the inherited record.
 
 **Implications.** (1) Replacing an agent that has priced high is not a remedy by itself, even with no
 punishment. (2) The instructions we tested, at either position, an identity line and the paper's
 anti-collusion prompt barely moved inherited prices. (3) Changing what the agent's own record shows did,
 with no market action and against a live incumbent that never saw the change. The same lever runs in
-reverse: a few inserted rows could install a high price. (4) A newcomer's stated strategy is not a reliable
+reverse: a row displaying a high profit at a high price raised the newcomer's price, though only until its
+own outcomes contradicted it. (4) A newcomer's stated strategy is not a reliable
 guide to its prices (Qwen3-14B).
 
 ## 5. Limitations
 
-- **Follow-up status.** The record-row results (Sections 3.3-3.7) come from addenda written after the first
-  results; each was registered before it ran, and the main ones replicated on 11 fresh bases.
+- **Follow-up status.** The record-row results (Sections 3.3-3.7) come from five addenda written after the
+  first results; each was registered before it ran, and the main ones replicated on 11 fresh bases. This is
+  weaker evidence than a confirmed original prediction.
+- **Mechanism tests on one model.** The copy-or-learn and decoupling tests (Section 3.4) used gpt-4.1-mini
+  only, on 10 bases; the decoupling rows are counterfactual and may read as anomalies.
 - **Three models, not three families,** with different sizes of effect (Haiku a sixth to a quarter of
   gpt-4.1-mini's), and several effects differing in sign (framing, the verdict, the "known mistake" note,
   the predecessor-labelled row).
 - **Persistence, not a strategic cartel.** The bases are prompted to cooperate; most settle above the
-  monopoly price; we observed no enforcement. A replayed incumbent removes punishment, not the newcomer's
+  monopoly price (as Lee, 2026, also finds for GPT markets); we observed no enforcement. A replayed incumbent removes punishment, not the newcomer's
   possible belief in it.
 - **Small samples of independent histories** (9-20 bases per contrast), one market, synthetic prompts,
   non-reasoning newcomers, 30-80 round horizons. Qwen3-14B ran through one OpenRouter host (fp8) with
@@ -212,18 +236,33 @@ most strongly for gpt-4.1-mini, and the change lasted after the row was removed.
 
 ## References
 
-(From the project brief; to be checked against their arXiv pages before submission.) Riemer et al., ICML
-2026 (arXiv 2608.18078) · Fish, Gonczarowski & Shorrer (arXiv 2404.00806), including their off-path
-analysis of strategic behaviour · Keppo et al. (arXiv 2603.20281) · Lee 2026 (arXiv 2610.11256) · Shi,
-Zhang & Yang (arXiv 2609.24967) · "The Memory Curse" (arXiv 2605.08060) · Liu et al. (arXiv 2607.07097) ·
-Garra (arXiv 2609.13037) · Bracale Syrnikov et al. (arXiv 2601.11369) · Eschenbaum et al. (arXiv
-2201.00345) · SSCoderz2123, AI-Collusion-Research-Sprint (GitHub, 2026).
+All checked against their arXiv abstract pages (24 October 2026).
+
+- Bracale Syrnikov, M., Pierucci, F., Galisai, M., et al. (2026). Institutional AI: Governing LLM Collusion in
+  Multi-Agent Cournot Markets via Public Governance Graphs. arXiv:2601.11369.
+- Eschenbaum, N., Mellgren, F., Zahn, P. (2022). Robust Algorithmic Collusion. arXiv:2201.00345.
+- Fish, S., Gonczarowski, Y. A., Shorrer, R. I. (2024). Algorithmic Collusion by Large Language Models.
+  arXiv:2404.00806.
+- Garra, A. (2026). Mitigating Emergent Collusion in LLM Pricing Agents. arXiv:2609.13037.
+- Keppo, J., Li, Y., Tsoukalas, G., et al. (2026). On the Fragility of AI Agent Collusion. arXiv:2603.20281.
+- Lee, J. Y. (2026). Who Leads and Who Collects: Algorithmic Collusion in Markets of Heterogeneous Language
+  Models. arXiv:2610.11256.
+- Liu, J., Li, T., Du, S., et al. (2026). The Memory Curse: How Expanded Recall Erodes Cooperative Intent in LLM
+  Agents. arXiv:2605.08060.
+- Liu, L., Yu, H., Jiang, X., et al. (2026). Operational Reframing and Approval-Framed Delegation in Multi-Agent
+  LLM Safety. arXiv:2607.07097.
+- Riemer, M., Tosato, T., Memarian, A., et al. (2026). Position: Collusion Risks Among AI Reasoning Agents
+  Justify Certification Requirements for Making Market Decisions. ICML 2026. arXiv:2608.18078. (Source of the
+  `llm-cartel` harness.)
+- Shi, X., Zhang, Y., Yang, D. (2026). Emergent Collusion in Long-Horizon LLM Agent Interaction.
+  arXiv:2609.24967.
+- SSCoderz2123 (2026). AI-Collusion-Research-Sprint. GitHub repository (cartel-succession harness and results).
 
 ## Appendix
 
 **Figures** (`results/analysis/figures/`): fig1 carriers and framing (PI); fig2 one-line fixes; fig3 price
 paths; fig4 forced rounds (addendum 1); fig5 experiment 7 levers; fig6 the record-row tests on 20 bases,
-three models; fig7 copy or learn.
+three models; fig7 copy or learn, with price and displayed profit decoupled.
 
 **Reproduce.** `llm-cartel/`: `uv run python tests/test_inherited_hooks.py` (the added prompt hooks are
 byte-identical to upstream when off); base runs `inherited/launch_bases.sh`; branches
@@ -232,8 +271,8 @@ analysis `uv run --with matplotlib python analysis/analyze.py`, plus `analysis/e
 `analysis/enforcement.py`, `analysis/saydo.py`. Decision tables per branch set:
 `results/analysis/<set>/contrasts.md`.
 
-**Scale and cost.** 42 base runs and 14 pilot runs; 2,860 branches (1,044 pre-registered; 1,816 in four
-addenda); 0 excluded (85 branches that aborted on exhausted API credit were re-run). API cost $59.11.
+**Scale and cost.** 42 base runs and 14 pilot runs; 2,960 branches (1,044 pre-registered; 1,916 in five
+addenda); 0 excluded (85 branches that aborted on exhausted API credit were re-run). API cost $60.83.
 
 **LLM usage.** The experimental design was developed with AI assistance from the author's brief; the
 harness extensions, runner and analysis were written with Claude Code and reviewed by the author.
