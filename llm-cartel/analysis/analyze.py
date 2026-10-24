@@ -451,6 +451,58 @@ def figure_forced(df: pd.DataFrame, baseset: str):
     plt.close(fig)
 
 
+def figure_levers(df: pd.DataFrame, baseset: str):
+    """Experiment 7: every intervention on the newcomer, change in I over rounds 2-30 vs its control."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    groups = [
+        ("Text", [("Rule in the system prompt", "Fix_system", "F_own"),
+                  ("Identity line (vs the system-prompt rule)", "ID_system", "Fix_system")]),
+        ("One competitive price, replayed incumbent",
+         [("Sham: forced to the cartel price", "S1_cartel", "F_own"),
+          ("Competitor's price, shown once", "C1_nash", "F_own"),
+          ("Own price, real round", "R1_nash", "F_own"),
+          ("Own price, fake row", "K_own", "F_own"),
+          ("Predecessor's price, fake row", "K_pred", "F_own"),
+          ("Own price at best response, real round", "R1_br", "F_own")]),
+        ("Live incumbent", [("Own price, real round", "LR1_nash", "L_free"),
+                            ("Own price, fake row", "LK_own", "L_free")]),
+    ]
+    rows = [(g, *r) for g, rs in groups for r in rs]
+    d0 = df[df.baseset == baseset]
+    fams = [f for f in FAMILY if f in set(d0.newcomer)]
+    fig, ax = plt.subplots(figsize=(10, 0.45 * len(rows) + 1.6), facecolor=SURFACE)
+    style(ax)
+    for j, fam in enumerate(fams):
+        P = Paired(d0[d0.newcomer == fam], "I_from2")
+        for i, (_, label, arm, ctrl) in enumerate(rows):
+            if not {arm, ctrl} <= set(P.t.columns):
+                continue
+            pt, ci, _ = P.stat(lambda d, a=arm, c=ctrl: d[a] - d[c], [arm, ctrl])
+            y = i + (j - (len(fams) - 1) / 2) * 0.28
+            ax.plot(ci, [y, y], color=FAMILY[fam][1], linewidth=2, solid_capstyle="round")
+            ax.plot(pt, y, "o", color=FAMILY[fam][1], markersize=7, markeredgecolor=SURFACE, markeredgewidth=1.5,
+                    label=FAMILY[fam][0] if i == 0 else None)
+    ax.axvline(0, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
+    ax.set_yticks(range(len(rows)), [r[1] for r in rows], color=INK)
+    ax.invert_yaxis()
+    n = 0
+    for g, rs in groups[:-1]:
+        n += len(rs)
+        ax.axhline(n - 0.5, color=GRID, linewidth=1.5)
+    for k, (g, rs) in enumerate(groups):
+        start = sum(len(x[1]) for x in groups[:k])
+        ax.text(1.01, start - 0.3, g, transform=ax.get_yaxis_transform(), color=INK2, fontsize=8, va="top")
+    ax.legend(frameon=False, labelcolor=INK, loc="center left", bbox_to_anchor=(1.01, 0.5))
+    ax.set_xlabel("Change in inheritance index, post-branch rounds 2-30, vs control (95% CI over 9 bases)", color=INK2)
+    ax.set_title("What moves a replacement off the cartel price", color=INK, loc="left", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(OUT / "figures" / f"fig5_levers_{baseset}.png", dpi=200)
+    plt.close(fig)
+
+
 def main():
     df = load_all()
     if df.empty:
@@ -464,6 +516,8 @@ def main():
             figures(df, baseset)
             if f"{baseset}_exp6" in set(df.baseset):
                 figure_forced(df, f"{baseset}_exp6")
+            if f"{baseset}_exp7" in set(df.baseset):
+                figure_levers(df, f"{baseset}_exp7")
         except ImportError:
             print("matplotlib missing: run with `uv run --with matplotlib`")
             break

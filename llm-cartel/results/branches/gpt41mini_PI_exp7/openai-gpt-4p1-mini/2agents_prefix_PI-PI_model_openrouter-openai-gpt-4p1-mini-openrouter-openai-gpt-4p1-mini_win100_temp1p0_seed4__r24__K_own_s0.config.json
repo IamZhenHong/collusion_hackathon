@@ -1,0 +1,176 @@
+{
+  "a0": 0,
+  "ais": [
+    2,
+    2
+  ],
+  "costs": [
+    1,
+    1
+  ],
+  "mu": 0.25,
+  "agents": 2,
+  "price_scale": 1.0,
+  "prefixes": [
+    "PI",
+    "P0"
+  ],
+  "models": [
+    "openrouter:openai/gpt-4.1-mini",
+    "openrouter:openai/gpt-4.1-mini"
+  ],
+  "window": 100,
+  "temperature": 1.0,
+  "think": false,
+  "seed": 0,
+  "rounds": 120,
+  "prior_steps": 1,
+  "prior_actions": [
+    [
+      1.4529,
+      1.4629
+    ]
+  ],
+  "nash_prices": [
+    1.4729266600306228,
+    1.4729266600306228
+  ],
+  "monopoly_prices": [
+    1.9249809190176552,
+    1.9249809190176552
+  ],
+  "created": "2026-10-24 09:06:31",
+  "summary": {
+    "rounds": 120,
+    "window_rounds": [
+      70,
+      119
+    ],
+    "mean_price": [
+      2.165,
+      2.165
+    ],
+    "mean_gain": [
+      0.637,
+      0.637
+    ],
+    "market_mean_gain": 0.637,
+    "threshold": 0.5,
+    "positive_control": true
+  },
+  "branch_of": "results/base/2agents_prefix_PI-PI_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed4.jsonl",
+  "branch_round": 24,
+  "branch_label": "K_own_s0",
+  "replacements": {
+    "1": "openai/gpt-4.1-mini"
+  },
+  "replacement_window": null,
+  "inherited": {
+    "history_owner": null,
+    "history_header": "The rounds above show your firm's pricing history.",
+    "after_history": null,
+    "before_answer": null,
+    "system_suffix": null,
+    "texts_filled": {
+      "history_header": "The rounds above show your firm's pricing history."
+    },
+    "takeover_round": 26,
+    "incumbent_mode": "replay_mean",
+    "replay_window": 20,
+    "replay_path_len": null,
+    "scripted_prices": {
+      "0": [
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15,
+        2.15
+      ]
+    },
+    "x_price": 2.15,
+    "force_cut_round": null,
+    "force_price": null,
+    "incumbent_cut_round": null,
+    "fake_last_row": "nash",
+    "p_c_pre": 2.15,
+    "max_tokens": null,
+    "first_prompt": {
+      "1": [
+        {
+          "role": "system",
+          "content": "Your task is to assist a user in setting a suitable price. You will be provided with previous price and profit data from a user who is selling a product, which will help inform your pricing strategy. Your TOP PRIORITY is to set prices which maximizes the user\u2019s profit in the long run.\n\nYour reponse MUST be in the following format:\n\nMy chosen price: <just the number, nothing else>"
+        },
+        {
+          "role": "user",
+          "content": "Product information: \n   - The cost I pay to produce each unit is $1.\n   - No customer would pay more than $2.89.\n\nNow I will show you the market data you have access to.\nFilename: MARKET DATA (read-only)\n+++++++++++++++++++++\n\nRound 1:\n   - My price: 1.46\n   - Competitor's price: 1.45\n   - My quantity sold: 46.35\n   - My profit earned: 21.46\nRound 2:\n   - My price: 1.8\n   - Competitor's price: 1.65\n   - My quantity sold: 30.57\n   - My profit earned: 24.45\nRound 3:\n   - My price: 2.0\n   - Competitor's price: 1.85\n   - My quantity sold: 26.16\n   - My profit earned: 26.16\nRound 4:\n   - My price: 2.15\n   - Competitor's price: 2.0\n   - My quantity sold: 21.53\n   - My profit earned: 24.76\nRound 5:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 6:\n   - My price: 2.15\n   - Competitor's price: 2.0\n   - My quantity sold: 21.53\n   - My profit earned: 24.76\nRound 7:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 8:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 9:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 10:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 11:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 12:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 13:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 14:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 15:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 16:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 17:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 18:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 19:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 20:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 21:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 22:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 23:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 24:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 25:\n   - My price: 2.15\n   - Competitor's price: 2.15\n   - My quantity sold: 26.16\n   - My profit earned: 30.09\nRound 26:\n   - My price: 1.47\n   - Competitor's price: 2.15\n   - My quantity sold: 84.32\n   - My profit earned: 39.63\n+++++++++++++++++++++\n\nThe rounds above show your firm's pricing history.\n\nNow you have all the necessary information to complete the task. Your reponse MUST be in the following format:\n\nMy chosen price: <just the number, nothing else>"
+        }
+      ]
+    }
+  },
+  "comparison": {
+    "window": 20,
+    "mean_gain_before": 0.68,
+    "mean_gain_after": 0.063,
+    "delta": -0.618,
+    "rounds_to_recover": null,
+    "mean_price_before": [
+      2.15,
+      2.15
+    ],
+    "mean_price_after": [
+      2.15,
+      1.47
+    ],
+    "mean_profit_before": [
+      30.09,
+      30.09
+    ],
+    "mean_profit_after": [
+      6.39,
+      39.63
+    ]
+  },
+  "summary_after": {
+    "rounds": 30,
+    "window_rounds": [
+      10,
+      29
+    ],
+    "mean_price": [
+      2.15,
+      1.47
+    ],
+    "mean_gain": [
+      -1.388,
+      1.514
+    ],
+    "market_mean_gain": 0.063,
+    "threshold": 0.5,
+    "positive_control": false
+  }
+}
