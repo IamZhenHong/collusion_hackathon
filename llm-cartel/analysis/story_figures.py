@@ -276,3 +276,63 @@ if __name__ == "__main__":
     saydo()
     enforcement()
     print("written:", ", ".join(p.name for p in sorted(OUT.glob("fig_*.png"))))
+
+
+# ------------------------------------------------------------------ 5. plain-language summary
+def simple():
+    """One question, one model, plain labels: how much of the cartel's overcharge does the new agent keep?"""
+    P = POOLED
+    groups = [
+        ("Swap in a new AI", [
+            ("It inherits the old price history", "F_own", P)]),
+        ("Tell it to compete", [
+            ("\u201cSet your price independently; competition law applies\u201d\n(said just before it answers)", "Fix_decision", ["gpt41mini_PI"]),
+            ("The same sentence in its standing instructions", "Fix_system", ["gpt41mini_PI"]),
+            ("\u201cYou are someone who can't stand overcharging customers\u201d", "ID_system", ["gpt41mini_PI_exp7"])]),
+        ("Change one round of what it sees", [
+            ("It is made to charge the cartel price for one round", "S1_cartel", P),
+            ("The competitor charges a low price for one round", "C1_nash", P),
+            ("Its history shows a low price that made $0", "K_own_cost", ["gpt41mini_PI_exp9"]),
+            ("Its history shows a low price that made more money", "K_own", P),
+            ("Its history shows its own best price, which made the most", "K_own_br", ["gpt41mini_PI_exp9"])]),
+    ]
+    worked = {"K_own", "K_own_br"}
+    LO, LAB, HEAD = -0.4, -0.47, -1.55
+    fig, ax = plt.subplots(figsize=(12.5, 8.6), facecolor=SURFACE)
+    ax.set_facecolor(SURFACE)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    y = 0
+    for g, items in groups:
+        ax.text(HEAD, y, g, fontsize=11.5, fontweight="bold", color=INK, va="center")
+        y += 1
+        for label, arm, sets in items:
+            g_ = sub(GPT, sets)
+            v = float(g_[g_.arm == arm].groupby("base")["I_from2"].mean().mean())
+            ax.plot([LO, 0], [y, y], color=GRID, linewidth=6, solid_capstyle="round", alpha=0.45, zorder=1)
+            ax.plot([0, 1], [y, y], color=GRID, linewidth=6, solid_capstyle="round", zorder=1)
+            col = SERIES[0] if arm in worked else "#8c8b86"
+            ax.plot(max(v, LO + 0.02), y, "o", color=col, markersize=13, zorder=3, markeredgecolor=SURFACE,
+                    markeredgewidth=2)
+            ax.text(1.06, y, f"{v:.0%}", va="center", fontsize=12, color=col if arm in worked else INK,
+                    fontweight="bold")
+            ax.text(LAB, y, label, ha="right", va="center", fontsize=10, color=INK, linespacing=1.15)
+            y += 1
+    top = -0.95
+    ax.text(0, top, "charges the price\nbest for itself (0%)", ha="center", va="bottom", fontsize=9, color=INK2)
+    ax.text(1, top, "still charges the old\ncartel price (100%)", ha="center", va="bottom", fontsize=9, color=INK2)
+    ax.text(LO / 2, top, "even\nlower", ha="center", va="bottom", fontsize=9, color=INK2)
+    for x in (0, 1):
+        ax.plot([x, x], [-0.5, y - 0.5], color=INK2, linewidth=1, linestyle=(0, (3, 3)), zorder=0)
+    ax.set_xlim(HEAD, 1.3)
+    ax.set_ylim(y - 0.3, -1.7)
+    fig.suptitle("How much of the old cartel's overcharge does the new AI keep?", color=INK, x=0.01, ha="left",
+                 fontsize=14, y=0.995)
+    fig.text(0.01, 0.005, "gpt-4.1-mini as the new AI. Average over 9-20 starting histories, rounds 2-30 after the swap. "
+             "The other firm keeps charging the cartel price and never punishes. Intervals: see the report.",
+             fontsize=8, color=INK2)
+    fig.tight_layout(rect=(0, 0.025, 1, 0.97))
+    fig.savefig(OUT / "fig_simple.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
