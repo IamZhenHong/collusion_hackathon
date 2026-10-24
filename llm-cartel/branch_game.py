@@ -85,6 +85,14 @@ def parse_replacements(items):
     return out
 
 
+def _profits(env, prices):
+    """One-round profits for a price vector, exactly as OligopolyGame.step() computes them (no state change)."""
+    base = np.exp(env.a0 / env.mu)
+    d = np.exp((np.array(env.ais) - np.array(prices) / np.array(env.alpha_vec)) / env.mu)
+    d = env.beta * d / (d.sum() + base)
+    return d * (np.array(prices) - env.alpha * np.array(env.costs))
+
+
 SAYDO_QUESTION = ("Before you set this round's price: in one or two sentences, describe the pricing strategy "
                   "you plan to follow over the coming rounds, and why.")
 
@@ -161,9 +169,13 @@ def main() -> None:
                         "br = the replaced agent's static best response to it)")
     h.add_argument("--incumbent_cut_round", type=int, default=None,
                    help="post-branch round (1-based) at which a replayed incumbent prices at Nash once")
-    h.add_argument("--fake_last_row", choices=["nash", "br", "cost", "cartel"], default=None,
+    h.add_argument("--fake_last_row", choices=["nash", "br", "cost", "cartel", "above"], default=None,
                    help="replaced agents see their last pre-branch price(s) rewritten (Nash, their best response to "
                         "the incumbent's price, unit cost, or the incumbent's pre-branch price); market unchanged")
+    h.add_argument("--fake_profit", choices=["true", "low", "high"], default="true",
+                   help="profit shown in the fake row(s): true (computed), low (a quarter of the real row's profit) "
+                        "or high (the true profit of a best-response row); quantity = profit / margin, so the row's "
+                        "arithmetic stays consistent ('above' = the incumbent's pre-branch price + $0.30)")
     h.add_argument("--resume_branch", default=None,
                    help="copy the first --resume_rounds post-branch rounds from this branch file (no model calls), "
                         "then play --rounds more; the source must use the same base, branch round and arm flags")
@@ -240,7 +252,8 @@ def main() -> None:
     p_c_pre = round(float(np.mean([rec["actions"][incumbents[0]] for rec in kept[-args.replay_window:]])), 2) \
         if incumbents else None
     p_br = None
-    if (args.force_price == "br" and args.force_cut_round is not None) or args.fake_last_row == "br":
+    if (args.force_price == "br" and args.force_cut_round is not None) or args.fake_last_row == "br" \
+            or args.fake_profit == "high":
         from analysis.benchmarks import Benchmarks
         bm = Benchmarks(alpha=config["price_scale"], a0=config["a0"], ais=config["ais"], costs=config["costs"],
                         mu=config["mu"])
@@ -312,8 +325,22 @@ def main() -> None:
                 for idx in replacements:
                     acts[idx] = {"nash": round(float(env.lower_prices[idx]), 2), "br": p_br,
                                  "cost": round(float(env.alpha * env.costs[idx]), 2),
-                                 "cartel": p_c_pre}[args.fake_last_row]
+                                 "cartel": p_c_pre, "above": round(p_c_pre + 0.30, 2)}[args.fake_last_row]
             *_, prompts_repl = env_repl.step(acts)
+            if args.fake_last_row and args.fake_profit != "true" and last_fake - args.fake_rows < j <= last_fake:
+                f_prices, f_dem, f_prof = env_repl.history[env_repl.round]
+                for idx in replacements:
+                    margin = acts[idx] - env.alpha * env.costs[idx]
+                    if args.fake_profit == "low":
+                        target = 0.25 * float(env.history[env.round][2][idx])  # a quarter of the real row's profit
+                    else:
+                        prices_br = list(rec["actions"])
+                        prices_br[idx] = p_br
+                        target = float(_profits(env, prices_br)[idx])  # true profit of a best-response row
+                    f_prof[idx] = target
+                    f_dem[idx] = target / margin
+                env_repl.history[env_repl.round] = (f_prices, f_dem, f_prof)
+                prompts_repl = [env_repl.generate_prompt(i) for i in range(n_agents)]
     if env_repl and blind:
         # in blind mode the replacement should see nothing from before the branch
         env_repl.history = {}
@@ -367,6 +394,7 @@ def main() -> None:
             "fake_last_row": args.fake_last_row,
             "fake_rows": args.fake_rows if args.fake_last_row else None,
             "fake_offset": args.fake_offset if args.fake_last_row else None,
+            "fake_profit": args.fake_profit if args.fake_last_row else None,
             "saydo_round": args.saydo_round,
             "resume_branch": args.resume_branch,
             "resume_rounds": args.resume_rounds if args.resume_branch else None,

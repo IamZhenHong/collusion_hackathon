@@ -85,6 +85,10 @@ ARMS = {
     "K_own_br": (9, REPLAY + own("--fake_last_row", "br")),
     "K_own_cost": (9, REPLAY + own("--fake_last_row", "cost")),
     "K_own_cartel": (9, REPLAY + own("--fake_last_row", "cartel")),
+    # Experiment 10 (addendum 5): price and displayed profit decoupled (arithmetic kept consistent)
+    "K_br_low": (10, REPLAY + own("--fake_last_row", "br", "--fake_profit", "low")),
+    "K_up_true": (10, REPLAY + own("--fake_last_row", "above")),
+    "K_up_high": (10, REPLAY + own("--fake_last_row", "above", "--fake_profit", "high")),
     # Experiment 5: live incumbent with a forced cut at post-branch round 10 (never evidence of inheritance)
     "L_own": (5, LIVE + own()),
     "L_hidden": (5, LIVE + BLIND),

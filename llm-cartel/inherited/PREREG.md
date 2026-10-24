@@ -238,3 +238,30 @@ the newcomer's cumulative profit relative to L_free. Descriptive; the claim is l
 observed or not, within the tested horizon".
 
 Intervals: 10,000 bootstrap resamples over bases (clustered by base) as before.
+
+## Addendum 5 (2026-10-24, written after addendum 4; before these runs)
+
+Addendum 4 changed a fake row's price and profit together, so it cannot say whether the newcomer follows the
+price or the displayed profit. Here they are decoupled, keeping each row's arithmetic consistent (quantity =
+profit / margin; a row at unit cost cannot show a profit, so the decoupling holds the price fixed and
+varies the displayed profit). gpt-4.1-mini, the same 10 bases, replayed incumbent, F_own framing, seeds 0-1,
+30 rounds, arms interleaved (set `gpt41mini_PI_exp10`); spending cap $3.
+
+| Arm | Fake last own row |
+|---|---|
+| `K_own_br` | best-response price, its true (high) profit |
+| `K_br_low` | best-response price, a quarter of the real last row's profit (fewer units sold) |
+| `K_up_true` | the incumbent's price + $0.30, its true (lower) profit |
+| `K_up_high` | the incumbent's price + $0.30, the profit a best-response row would show (more units sold) |
+| `F_own` | control |
+
+Decision rules (I over rounds 1-30, paired within base, bootstrap over bases):
+- H10a (displayed profit matters at a fixed competitive price): I(K_br_low) - I(K_own_br) positive, interval
+  excluding 0.
+- H10b (displayed profit matters at a fixed high price): I(K_up_high) - I(K_up_true) positive, interval
+  excluding 0, i.e. a high-profit row priced above the cartel raises the newcomer's price.
+- Readings: both supported = it follows the displayed outcome ("learns from the example"); neither, with
+  K_br_low still lowering I like K_own_br = it follows the price. Also reported: the share of rounds at the
+  fake row's price, and each arm vs F_own.
+- Caveat fixed now: a low-price row showing few units sold is implausible next to the other rows; the
+  newcomer may discount it as an anomaly.
