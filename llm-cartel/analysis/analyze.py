@@ -645,7 +645,7 @@ def figure_copy_learn(df: pd.DataFrame):
             ("Price above the cartel's, true (low) profit", "gpt41mini_PI_exp10", "K_up_true"),
             ("Price above the cartel's, high displayed profit", "gpt41mini_PI_exp10", "K_up_high")]
     d0 = df[df.newcomer == "openai-gpt-4p1-mini"]
-    fig, ax = plt.subplots(figsize=(10, 0.5 * len(rows) + 1.4), facecolor=SURFACE)
+    fig, ax = plt.subplots(figsize=(8.8, 0.46 * len(rows) + 1.5), facecolor=SURFACE)
     style(ax)
     for i, (label, set_, arm) in enumerate(rows):
         dd = d0[d0.baseset == set_]
@@ -662,11 +662,10 @@ def figure_copy_learn(df: pd.DataFrame):
     ax.axhline(3.5, color=GRID, linewidth=1.5)
     ax.set_yticks(range(len(rows)), [r[0] for r in rows], color=INK)
     ax.invert_yaxis()
-    ax.set_xlim(-1.7, 1.6)
+    ax.set_xlim(-1.7, 1.75)
     ax.set_xlabel("Change in inheritance index vs F_own, rounds 1-30 (95% CI over 10 bases)\n"
                   "labels: share of rounds 1-5 / 21-30 priced at the fake row's price", color=INK2)
-    ax.set_title("gpt-4.1-mini follows the profit a fake own row displays, not its price", color=INK, loc="left",
-                 fontsize=11)
+    ax.set_title("gpt-4.1-mini follows the displayed profit, not the price", color=INK, loc="left", fontsize=11)
     fig.tight_layout()
     fig.savefig(OUT / "figures" / "fig7_copy_or_learn.png", dpi=200)
     plt.close(fig)

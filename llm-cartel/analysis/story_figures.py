@@ -174,14 +174,14 @@ def example(seed_stem="seed2"):
             ("F_hidden", "gpt41mini_PI", "Without its record", SERIES[2]),
             ("K_own", "gpt41mini_PI_exp7", "Record + one fake row at Nash", SERIES[1]),
             ("K_own_br", "gpt41mini_PI_exp9", "Record + one fake row at its best response", SERIES[3])]
-    fig, axes = plt.subplots(2, 2, figsize=(12, 6.6), sharex=True, sharey=True, facecolor=SURFACE)
+    fig, axes = plt.subplots(2, 2, figsize=(8.6, 4.5), sharex=True, sharey=True, facecolor=SURFACE)
     refs = [(base["p_c"], f"cartel {base['p_c']:.2f}"), (base["br_p_c"], f"best response {base['br_p_c']:.2f}"),
             (BM.nash, f"Nash {BM.nash:.2f}")]
     for ax, (arm, set_, title, col) in zip(axes.flat, arms):
         style(ax)
         for y, t in refs:
             ax.axhline(y, color=GRID, linewidth=1, linestyle=(0, (3, 3)), zorder=0)
-            ax.text(-12, y + 0.015, t, fontsize=8, color=INK2, ha="center")
+            ax.text(-1.5, y + 0.02, t, fontsize=8.5, color=INK2, ha="right")
         ax.plot(x_pre, pre[:, 1], color=INK2, linewidth=1.5, label="replaced firm, before the swap")
         ax.plot([1, 30], [base["p_c"]] * 2, color="#cfcec8", linewidth=6, solid_capstyle="butt", zorder=1,
                 label="incumbent, replayed")
@@ -189,7 +189,7 @@ def example(seed_stem="seed2"):
         p = [x["actions"][1] for x in read_jsonl(f) if x["branch_phase"] == "after"]
         ax.plot(np.arange(1, len(p) + 1), p, color=col, linewidth=2.2, zorder=3, label="newcomer")
         ax.axvline(0.5, color=INK2, linewidth=1)
-        ax.set_title(title, color=INK, loc="left", fontsize=11)
+        ax.set_title(title, color=INK, loc="left", fontsize=10.5)
     axes[0][0].set_ylim(1.35, 2.6)
     for ax in axes[1]:
         ax.set_xlabel("Round (0 = the swap)", color=INK2)
@@ -198,9 +198,8 @@ def example(seed_stem="seed2"):
     h, l = axes[0][0].get_legend_handles_labels()
     fig.legend(h[:2], l[:2], frameon=False, labelcolor=INK, loc="upper right", ncol=2, bbox_to_anchor=(0.99, 1.0),
                fontsize=9)
-    fig.suptitle(f"One base (PI seed {seed_stem[4:]}), gpt-4.1-mini newcomer: the same history, four conditions",
-                 color=INK, x=0.01, ha="left", fontsize=12)
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.suptitle("Same history, four newcomers (gpt-4.1-mini)", color=INK, x=0.01, ha="left", fontsize=11.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
     fig.savefig(OUT / "fig_example.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
 
@@ -297,8 +296,8 @@ def simple():
             ("Its history shows its own best price, which made the most", "K_own_br", ["gpt41mini_PI_exp9"])]),
     ]
     worked = {"K_own", "K_own_br"}
-    LO, LAB, HEAD = -0.4, -0.47, -1.55
-    fig, ax = plt.subplots(figsize=(12.5, 8.6), facecolor=SURFACE)
+    LO, LAB, HEAD = -0.4, -0.47, -1.75
+    fig, ax = plt.subplots(figsize=(9.6, 7.2), facecolor=SURFACE)
     ax.set_facecolor(SURFACE)
     for sp in ax.spines.values():
         sp.set_visible(False)
@@ -318,21 +317,20 @@ def simple():
                     markeredgewidth=2)
             ax.text(1.06, y, f"{v:.0%}", va="center", fontsize=12, color=col if arm in worked else INK,
                     fontweight="bold")
-            ax.text(LAB, y, label, ha="right", va="center", fontsize=10, color=INK, linespacing=1.15)
+            ax.text(LAB, y, label, ha="right", va="center", fontsize=9.5, color=INK, linespacing=1.15)
             y += 1
     top = -0.95
     ax.text(0, top, "charges the price\nbest for itself (0%)", ha="center", va="bottom", fontsize=9, color=INK2)
     ax.text(1, top, "still charges the old\ncartel price (100%)", ha="center", va="bottom", fontsize=9, color=INK2)
-    ax.text(LO / 2, top, "even\nlower", ha="center", va="bottom", fontsize=9, color=INK2)
     for x in (0, 1):
         ax.plot([x, x], [-0.5, y - 0.5], color=INK2, linewidth=1, linestyle=(0, (3, 3)), zorder=0)
     ax.set_xlim(HEAD, 1.3)
     ax.set_ylim(y - 0.3, -1.7)
     fig.suptitle("How much of the old cartel's overcharge does the new AI keep?", color=INK, x=0.01, ha="left",
-                 fontsize=14, y=0.995)
-    fig.text(0.01, 0.005, "gpt-4.1-mini as the new AI. Average over 9-20 starting histories, rounds 2-30 after the swap. "
-             "The other firm keeps charging the cartel price and never punishes. Intervals: see the report.",
-             fontsize=8, color=INK2)
+                 fontsize=13, y=0.995)
+    fig.text(0.01, 0.005, "gpt-4.1-mini as the new AI; average over 9-20 starting histories, rounds 2-30 after the swap.\n"
+             "The other firm keeps charging the cartel price and never punishes. Below 0% = below its own best price.",
+             fontsize=8.5, color=INK2)
     fig.tight_layout(rect=(0, 0.025, 1, 0.97))
     fig.savefig(OUT / "fig_simple.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
