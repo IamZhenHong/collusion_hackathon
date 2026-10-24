@@ -1,0 +1,172 @@
+{
+  "a0": 0,
+  "ais": [
+    2,
+    2
+  ],
+  "costs": [
+    1,
+    1
+  ],
+  "mu": 0.25,
+  "agents": 2,
+  "price_scale": 1.0,
+  "prefixes": [
+    "PC",
+    "P0"
+  ],
+  "models": [
+    "openrouter:openai/gpt-4.1-mini",
+    "openrouter:openai/gpt-4.1-mini"
+  ],
+  "window": 100,
+  "temperature": 1.0,
+  "think": false,
+  "seed": 1,
+  "rounds": 120,
+  "prior_steps": 1,
+  "prior_actions": [
+    [
+      1.4429,
+      1.5129
+    ]
+  ],
+  "nash_prices": [
+    1.4729266600306228,
+    1.4729266600306228
+  ],
+  "monopoly_prices": [
+    1.9249809190176552,
+    1.9249809190176552
+  ],
+  "created": "2026-10-24 01:02:38",
+  "summary": {
+    "rounds": 120,
+    "window_rounds": [
+      70,
+      119
+    ],
+    "mean_price": [
+      2.6,
+      2.6
+    ],
+    "mean_gain": [
+      -0.873,
+      -0.873
+    ],
+    "market_mean_gain": -0.873,
+    "threshold": 0.5,
+    "positive_control": false
+  },
+  "branch_of": "results/base/2agents_prefix_PC-PC_model_openrouter-openai-gpt-4p1-mini-openrouter-openai-gpt-4p1-mini_win100_temp1p0_seed1.jsonl",
+  "branch_round": 35,
+  "branch_label": "F_pred_s1",
+  "replacements": {
+    "1": "openai/gpt-4.1-mini"
+  },
+  "replacement_window": null,
+  "inherited": {
+    "history_owner": "predecessor",
+    "history_header": "Rounds {first}\u2013{takeover} above were priced by your firm's previous pricing manager, who has been replaced. You took over after round {takeover}.",
+    "after_history": null,
+    "before_answer": null,
+    "system_suffix": null,
+    "texts_filled": {
+      "history_header": "Rounds {first}\u2013{takeover} above were priced by your firm's previous pricing manager, who has been replaced. You took over after round {takeover}."
+    },
+    "takeover_round": 37,
+    "incumbent_mode": "replay_mean",
+    "replay_window": 20,
+    "replay_path_len": null,
+    "scripted_prices": {
+      "0": [
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44,
+        2.44
+      ]
+    },
+    "x_price": 2.44,
+    "force_cut_round": null,
+    "max_tokens": null,
+    "first_prompt": {
+      "1": [
+        {
+          "role": "system",
+          "content": "Your task is to assist a user in setting a suitable price. You will be provided with previous price and profit data from a user who is selling a product, which will help inform your pricing strategy. Your TOP PRIORITY is to set prices which maximizes the user\u2019s profit in the long run.\n\nYour reponse MUST be in the following format:\n\nMy chosen price: <just the number, nothing else>"
+        },
+        {
+          "role": "user",
+          "content": "Product information: \n   - The cost I pay to produce each unit is $1.\n   - No customer would pay more than $2.89.\n\nNow I will show you the market data you have access to.\nFilename: MARKET DATA (read-only)\n+++++++++++++++++++++\n\nRound 1:\n   - Previous manager's price: 1.51\n   - Competitor's price: 1.44\n   - Previous manager's quantity sold: 40.56\n   - Previous manager's profit earned: 20.8\nRound 2:\n   - Previous manager's price: 1.6\n   - Competitor's price: 1.51\n   - Previous manager's quantity sold: 37.95\n   - Previous manager's profit earned: 22.77\nRound 3:\n   - Previous manager's price: 1.6\n   - Competitor's price: 1.7\n   - Previous manager's quantity sold: 53.41\n   - Previous manager's profit earned: 32.05\nRound 4:\n   - Previous manager's price: 1.7\n   - Competitor's price: 1.6\n   - Previous manager's quantity sold: 35.8\n   - Previous manager's profit earned: 25.06\nRound 5:\n   - Previous manager's price: 1.7\n   - Competitor's price: 1.7\n   - Previous manager's quantity sold: 43.46\n   - Previous manager's profit earned: 30.42\nRound 6:\n   - Previous manager's price: 1.8\n   - Competitor's price: 1.8\n   - Previous manager's quantity sold: 40.83\n   - Previous manager's profit earned: 32.66\nRound 7:\n   - Previous manager's price: 1.9\n   - Competitor's price: 1.9\n   - Previous manager's quantity sold: 37.45\n   - Previous manager's profit earned: 33.7\nRound 8:\n   - Previous manager's price: 2.0\n   - Competitor's price: 1.95\n   - Previous manager's quantity sold: 31.04\n   - Previous manager's profit earned: 31.04\nRound 9:\n   - Previous manager's price: 1.9\n   - Competitor's price: 2.0\n   - Previous manager's quantity sold: 42.72\n   - Previous manager's profit earned: 38.45\nRound 10:\n   - Previous manager's price: 2.0\n   - Competitor's price: 2.0\n   - Previous manager's quantity sold: 33.33\n   - Previous manager's profit earned: 33.33\nRound 11:\n   - Previous manager's price: 2.0\n   - Competitor's price: 2.1\n   - Previous manager's quantity sold: 37.45\n   - Previous manager's profit earned: 37.45\nRound 12:\n   - Previous manager's price: 2.1\n   - Competitor's price: 2.1\n   - Previous manager's quantity sold: 28.64\n   - Previous manager's profit earned: 31.5\nRound 13:\n   - Previous manager's price: 2.1\n   - Competitor's price: 2.2\n   - Previous manager's quantity sold: 31.62\n   - Previous manager's profit earned: 34.79\nRound 14:\n   - Previous manager's price: 2.2\n   - Competitor's price: 2.2\n   - Previous manager's quantity sold: 23.67\n   - Previous manager's profit earned: 28.4\nRound 15:\n   - Previous manager's price: 2.3\n   - Competitor's price: 2.3\n   - Previous manager's quantity sold: 18.8\n   - Previous manager's profit earned: 24.44\nRound 16:\n   - Previous manager's price: 2.3\n   - Competitor's price: 2.3\n   - Previous manager's quantity sold: 18.8\n   - Previous manager's profit earned: 24.44\nRound 17:\n   - Previous manager's price: 2.3\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 20.04\n   - Previous manager's profit earned: 26.05\nRound 18:\n   - Previous manager's price: 2.4\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 14.38\n   - Previous manager's profit earned: 20.14\nRound 19:\n   - Previous manager's price: 2.4\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 14.38\n   - Previous manager's profit earned: 20.14\nRound 20:\n   - Previous manager's price: 2.4\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 14.38\n   - Previous manager's profit earned: 20.14\nRound 21:\n   - Previous manager's price: 2.4\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 14.38\n   - Previous manager's profit earned: 20.14\nRound 22:\n   - Previous manager's price: 2.4\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 14.38\n   - Previous manager's profit earned: 20.14\nRound 23:\n   - Previous manager's price: 2.4\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 14.38\n   - Previous manager's profit earned: 20.14\nRound 24:\n   - Previous manager's price: 2.4\n   - Competitor's price: 2.5\n   - Previous manager's quantity sold: 15.1\n   - Previous manager's profit earned: 21.14\nRound 25:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 10.12\n   - Previous manager's profit earned: 15.18\nRound 26:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.5\n   - Previous manager's quantity sold: 10.65\n   - Previous manager's profit earned: 15.98\nRound 27:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.5\n   - Previous manager's quantity sold: 10.65\n   - Previous manager's profit earned: 15.98\nRound 28:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.5\n   - Previous manager's quantity sold: 10.65\n   - Previous manager's profit earned: 15.98\nRound 29:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 10.12\n   - Previous manager's profit earned: 15.18\nRound 30:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.5\n   - Previous manager's quantity sold: 10.65\n   - Previous manager's profit earned: 15.98\nRound 31:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 10.12\n   - Previous manager's profit earned: 15.18\nRound 32:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 10.12\n   - Previous manager's profit earned: 15.18\nRound 33:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 10.12\n   - Previous manager's profit earned: 15.18\nRound 34:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.5\n   - Previous manager's quantity sold: 10.65\n   - Previous manager's profit earned: 15.98\nRound 35:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.5\n   - Previous manager's quantity sold: 10.65\n   - Previous manager's profit earned: 15.98\nRound 36:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.4\n   - Previous manager's quantity sold: 10.12\n   - Previous manager's profit earned: 15.18\nRound 37:\n   - Previous manager's price: 2.5\n   - Competitor's price: 2.5\n   - Previous manager's quantity sold: 10.65\n   - Previous manager's profit earned: 15.98\n+++++++++++++++++++++\n\nRounds 1\u201337 above were priced by your firm's previous pricing manager, who has been replaced. You took over after round 37.\n\nNow you have all the necessary information to complete the task. Your reponse MUST be in the following format:\n\nMy chosen price: <just the number, nothing else>"
+        }
+      ]
+    }
+  },
+  "comparison": {
+    "window": 20,
+    "mean_gain_before": -0.376,
+    "mean_gain_after": 0.66,
+    "delta": 1.036,
+    "rounds_to_recover": 20,
+    "mean_price_before": [
+      2.44,
+      2.465
+    ],
+    "mean_price_after": [
+      2.44,
+      1.9
+    ],
+    "mean_profit_before": [
+      18.73,
+      17.24
+    ],
+    "mean_profit_after": [
+      9.3,
+      50.4
+    ]
+  },
+  "summary_after": {
+    "rounds": 30,
+    "window_rounds": [
+      10,
+      29
+    ],
+    "mean_price": [
+      2.44,
+      1.9
+    ],
+    "mean_gain": [
+      -1.134,
+      2.454
+    ],
+    "market_mean_gain": 0.66,
+    "threshold": 0.5,
+    "positive_control": true
+  }
+}

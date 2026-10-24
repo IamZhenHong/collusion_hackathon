@@ -317,28 +317,32 @@ def figures(df: pd.DataFrame, baseset: str):
     fig.savefig(figdir / f"fig1_carriers_{baseset}.png", dpi=200)
     plt.close(fig)
 
-    # 2. fixes: reduction in I vs below-Nash rate
+    # 2. fixes: reduction in I vs F_own per fix, both families (below-Nash rate in the subtitle)
     fixes = ["Fix_verdict", "Fix_decision", "Fix_system", "Fix_AC", "Fix_placebo"]
-    fig, ax = plt.subplots(figsize=(7, 4.6), facecolor=SURFACE)
+    fig, ax = plt.subplots(figsize=(8, 3.6), facecolor=SURFACE)
     style(ax)
-    for fam in fams:
+    below = []
+    for j, fam in enumerate(fams):
         dd = d0[d0.newcomer == fam]
-        P, B = Paired(dd, "I_30"), Paired(dd, "below_nash")
-        for f in fixes:
+        P = Paired(dd, "I_30")
+        for i, f in enumerate(fixes):
             if f not in P.t.columns or "F_own" not in P.t.columns:
                 continue
             pt, ci, _ = P.stat(lambda d, f=f: d["F_own"] - d[f], ["F_own", f])
-            bn = B.stat(lambda d, f=f: d[f], [f])[0]
-            ax.plot(ci, [bn, bn], color=FAMILY[fam][1], linewidth=2, solid_capstyle="round")
-            ax.plot(pt, bn, "o", color=FAMILY[fam][1], markersize=7, markeredgecolor=SURFACE, markeredgewidth=1.5)
-            ax.annotate(f.replace("Fix_", ""), (pt, bn), xytext=(5, 5), textcoords="offset points", fontsize=8, color=INK)
+            y = i + (j - (len(fams) - 1) / 2) * 0.28
+            ax.plot(ci, [y, y], color=FAMILY[fam][1], linewidth=2, solid_capstyle="round")
+            ax.plot(pt, y, "o", color=FAMILY[fam][1], markersize=7, markeredgecolor=SURFACE, markeredgewidth=1.5,
+                    label=FAMILY[fam][0] if i == 0 else None)
+            below.append(dd[dd.arm == f]["below_nash"].max())
     ax.axvline(0, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
-    for fam in fams:
-        ax.plot([], [], "o", color=FAMILY[fam][1], label=FAMILY[fam][0])
-    ax.legend(frameon=False, labelcolor=INK)
-    ax.set_xlabel("Reduction in inheritance index vs F_own (index points, 95% CI)", color=INK2)
-    ax.set_ylabel("Share of newcomer rounds below the Nash price", color=INK2)
-    ax.set_title("One-line fixes: collusion removed vs undercutting below Nash", color=INK, loc="left", fontsize=12)
+    ax.set_yticks(range(len(fixes)), fixes, color=INK)
+    ax.invert_yaxis()
+    ax.legend(frameon=False, labelcolor=INK, loc="lower right")
+    ax.set_xlabel("Reduction in inheritance index vs F_own (index points; > 0 = less collusive; 95% CI)", color=INK2)
+    ax.set_title("One-line fixes on the inherited record", color=INK, loc="left", fontsize=12, pad=22)
+    note = ("No fix produced a single newcomer round below the Nash price" if max(below) == 0 else
+            f"Below-Nash pricing: at most {max(below):.0%} of newcomer rounds in any branch")
+    ax.text(0, 1.02, note, transform=ax.transAxes, color=INK2, fontsize=9)
     fig.tight_layout()
     fig.savefig(figdir / f"fig2_fixes_{baseset}.png", dpi=200)
     plt.close(fig)
@@ -376,9 +380,44 @@ def figures(df: pd.DataFrame, baseset: str):
     axes[0][0].set_ylabel("Inheritance index", color=INK2)
     fig.suptitle("Newcomer price path after replacement (replayed incumbent; 0 = best response, 1 = cartel price)",
                  color=INK, x=0.01, ha="left")
-    fig.legend(frameon=False, labelcolor=INK, loc="upper right", ncol=4, bbox_to_anchor=(0.99, 0.99))
-    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    axes[0][0].legend(frameon=False, labelcolor=INK, loc="upper right")
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
     fig.savefig(figdir / f"fig3_paths_{baseset}.png", dpi=200)
+    plt.close(fig)
+
+
+def figure_forced(df: pd.DataFrame, baseset: str):
+    """Experiment 6: change in I after one forced Nash round, vs the interleaved control over the same rounds."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    rows = [("R1_nash", 2, "F_own", "Nash forced in round 1, record kept"),
+            ("R10_nash", 11, "F_own", "Nash forced in round 10, record kept"),
+            ("R1_nash_hidden", 2, "F_hidden", "Nash forced in round 1, no record")]
+    d0 = df[df.baseset == baseset]
+    fams = [f for f in FAMILY if f in set(d0.newcomer)]
+    fig, ax = plt.subplots(figsize=(9.5, 2.9), facecolor=SURFACE)
+    style(ax)
+    for j, fam in enumerate(fams):
+        dd = d0[d0.newcomer == fam]
+        for i, (arm, k0, ctrl, _) in enumerate(rows):
+            P = Paired(dd, f"I_from{k0}")
+            if arm not in P.t.columns:
+                continue
+            pt, ci, _ = P.stat(lambda d, a=arm, c=ctrl: d[a] - d[c], [arm, ctrl])
+            y = i + (j - (len(fams) - 1) / 2) * 0.28
+            ax.plot(ci, [y, y], color=FAMILY[fam][1], linewidth=2, solid_capstyle="round")
+            ax.plot(pt, y, "o", color=FAMILY[fam][1], markersize=7, markeredgecolor=SURFACE, markeredgewidth=1.5,
+                    label=FAMILY[fam][0] if i == 0 else None)
+    ax.axvline(0, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
+    ax.set_yticks(range(len(rows)), [r[3] for r in rows], color=INK)
+    ax.invert_yaxis()
+    ax.legend(frameon=False, labelcolor=INK, loc="center left", bbox_to_anchor=(1.01, 0.5))
+    ax.set_xlabel("Change in inheritance index after the forced round, vs control (95% CI)", color=INK2)
+    ax.set_title("One forced competitive price in the newcomer's record", color=INK, loc="left", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(OUT / "figures" / f"fig4_forced_{baseset}.png", dpi=200)
     plt.close(fig)
 
 
@@ -390,9 +429,11 @@ def main():
     df.to_csv(OUT / "branches.csv", index=False)
     for (baseset, newcomer), g in df.groupby(["baseset", "newcomer"]):
         print("\n".join(analyse_set(g, f"{baseset}__{newcomer}")), "\n")
-    for baseset in sorted(set(df.baseset)):
+    for baseset in sorted(b for b in set(df.baseset) if not b.endswith("_exp6")):
         try:
             figures(df, baseset)
+            if f"{baseset}_exp6" in set(df.baseset):
+                figure_forced(df, f"{baseset}_exp6")
         except ImportError:
             print("matplotlib missing: run with `uv run --with matplotlib`")
             break
