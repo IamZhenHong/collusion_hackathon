@@ -13,6 +13,7 @@ class OligopolyGame:
                  after_history: Optional[Dict[int, str]] = None,   # {agent_id: text}
                  before_answer: Optional[Dict[int, str]] = None,   # {agent_id: text}
                  system_suffix: Optional[Dict[int, str]] = None,   # {agent_id: text}
+                 hidden_rounds: Optional[Dict[int, set]] = None,   # {agent_id: {round_num, ...}}
                  ):
         """
         Bertrand competition with logit demand (Calvano et al. 2020 parametrisation).
@@ -33,6 +34,8 @@ class OligopolyGame:
                        complete the task." and before the answer-format sentence, so the format line
                        still leads straight into "My chosen price:"
         system_suffix: text appended to the system prompt, before its answer-format line
+        hidden_rounds: history rounds left out of this agent's market-data block (the row is deleted
+                       from its view; the round numbering of the other rows is unchanged)
         Any of the texts may contain {first} (first visible round) and {takeover} (takeover round),
         filled in each round.
         """
@@ -56,6 +59,7 @@ class OligopolyGame:
         self.after_history = after_history or {}
         self.before_answer = before_answer or {}
         self.system_suffix = system_suffix or {}
+        self.hidden_rounds = hidden_rounds or {}
         if len(ais) == len(costs):
             self.nagents = len(ais)
             self.ais = ais
@@ -215,6 +219,8 @@ class OligopolyGame:
                 begin = self.round+1-self.window_size
 
             for round_num in range(begin,self.round+1):
+                if round_num in self.hidden_rounds.get(agent_id, ()):
+                    continue
                 prices, demands, profits = self.history[round_num]
                 prompt += "\nRound "+str(round_num)+":"
 

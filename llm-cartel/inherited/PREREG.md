@@ -201,3 +201,40 @@ plus a say-do probe. Same metrics, statistics and exclusion rules as above; arms
   statements both judges classify the same way; no human labels.
 
 Controls run interleaved within each batch's shuffled job.
+
+## Addendum 4 (2026-10-24, written after addendum 3; before these runs)
+
+Questions: does the newcomer copy a row or read its profit, and does the effect outlast the row? gpt-4.1-mini
+only; bases fixed in advance: the first 10 settled PI bases by seed number (0-7, 9, 10;
+`inherited/bases_gpt41mini_PI_exp9.json`); replayed incumbent; F_own framing; seeds 0-1; hard spending cap $8.
+
+**Test 1, copy or learn** (set `gpt41mini_PI_exp9`, 30 rounds, arms interleaved): one fake own row in the
+last inherited round, quantity and profit computed by the environment: `K_own_br` at the newcomer's best
+response BR(p_c) (the most profitable row it can see), `K_own_cost` at unit cost $1.00 (zero profit),
+`K_own_cartel` at p_c (sham), plus `K_own` (Nash, reference) and `F_own` (control).
+Measures: I over rounds 1-30 and 1-5; the newcomer's mean profit per round over rounds 1-30 (dollars); copy
+share = share of rounds at the fake row's price (within $0.005) in rounds 1-5 and 21-30.
+- H9a (sham): I(K_own_cartel) - I(F_own) has an interval including 0.
+- H9b (profitable row): I(K_own_br) - I(F_own) negative, interval excluding 0.
+- H9c (bad row), readings fixed now: action copying if the newcomer prices at $1.00 in at least 50% of rounds
+  1-5 (mean over branches); anchoring then adaptation if, in addition, that share falls by at least 0.25 by
+  rounds 21-30; profit-sensitive if the share in rounds 1-5 is below 0.25 and the newcomer's profit over
+  rounds 1-30 is not below F_own's (interval of the difference includes 0 or is positive).
+- Prediction: gpt-4.1-mini copies the bad price for a few rounds, then corrects.
+
+**Test 2, outlasting the cue** (set `gpt41mini_PI_exp9fork`): the 20 existing `K_own` branches on these
+bases (experiment 7 / addendum 3) are resumed after post-branch round 10 (rounds copied exactly, no calls)
+and continued for 25 rounds as `keep` (fake row stays), `delfake` (the fake row is deleted from the
+newcomer's view) and `deladj` (the real row just before it is deleted instead).
+- H9d: I over rounds 11-35, delfake - keep, deladj - keep, delfake - deladj. Readings fixed now: the effect
+  outlasts the row if delfake - keep has an interval including 0 and |difference| < 0.2; it depends on the
+  row staying visible if delfake - keep is positive with its interval excluding 0 while deladj - keep is not.
+- Prediction: delfake ~ keep (the newcomer's own later competitive rows carry it).
+
+**Test 3, enforcement** (existing data only, no new runs): for the live arms (L_free, LR1_nash, LK_own on 20
+bases; experiment 5's L_own, L_hidden), the incumbent's price change after the newcomer's competitive price,
+compared with a competitive benchmark (the incumbent's static best response to the newcomer's price), and
+the newcomer's cumulative profit relative to L_free. Descriptive; the claim is limited to "retaliation
+observed or not, within the tested horizon".
+
+Intervals: 10,000 bootstrap resamples over bases (clustered by base) as before.

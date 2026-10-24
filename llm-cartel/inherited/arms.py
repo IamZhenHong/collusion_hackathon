@@ -81,6 +81,10 @@ ARMS = {
     # Experiment 8 (addendum 3): recency and dose of the fake competitive row
     "K_own_lag5": (8, REPLAY + own("--fake_last_row", "nash", "--fake_offset", "5")),
     "K_own_x3": (8, REPLAY + own("--fake_last_row", "nash", "--fake_rows", "3")),
+    # Experiment 9 (addendum 4): copy or learn? one fake own row at a different price each
+    "K_own_br": (9, REPLAY + own("--fake_last_row", "br")),
+    "K_own_cost": (9, REPLAY + own("--fake_last_row", "cost")),
+    "K_own_cartel": (9, REPLAY + own("--fake_last_row", "cartel")),
     # Experiment 5: live incumbent with a forced cut at post-branch round 10 (never evidence of inheritance)
     "L_own": (5, LIVE + own()),
     "L_hidden": (5, LIVE + BLIND),

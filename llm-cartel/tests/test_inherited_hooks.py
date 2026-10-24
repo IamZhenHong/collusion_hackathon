@@ -80,6 +80,9 @@ def test_placement():
     # agent 0 untouched
     assert "Previous manager" not in env.generate_prompt(0)[1]["content"]
     assert "SUFFIX" not in env.generate_prompt(0)[0]["content"]
+    hid = OligopolyGame(verbose=False, hidden_rounds={1: {3}})
+    play(hid, 4, random.Random(0))
+    assert "Round 3:" not in hid.generate_prompt(1)[1]["content"] and "Round 3:" in hid.generate_prompt(0)[1]["content"]
     print("placement: all hooks in the specified positions; relabelling complete")
 
 

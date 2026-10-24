@@ -161,8 +161,16 @@ def main() -> None:
                         "br = the replaced agent's static best response to it)")
     h.add_argument("--incumbent_cut_round", type=int, default=None,
                    help="post-branch round (1-based) at which a replayed incumbent prices at Nash once")
-    h.add_argument("--fake_last_row", choices=["nash"], default=None,
-                   help="replaced agents see their last pre-branch price as Nash; the market is unchanged")
+    h.add_argument("--fake_last_row", choices=["nash", "br", "cost", "cartel"], default=None,
+                   help="replaced agents see their last pre-branch price(s) rewritten (Nash, their best response to "
+                        "the incumbent's price, unit cost, or the incumbent's pre-branch price); market unchanged")
+    h.add_argument("--resume_branch", default=None,
+                   help="copy the first --resume_rounds post-branch rounds from this branch file (no model calls), "
+                        "then play --rounds more; the source must use the same base, branch round and arm flags")
+    h.add_argument("--resume_rounds", type=int, default=0)
+    h.add_argument("--hide_row", choices=["fake", "adjacent"], default=None,
+                   help="after the resumed rounds, delete from the replaced agents' view the fake row (the last "
+                        "pre-branch round) or the real row just before it")
     h.add_argument("--fake_rows", type=int, default=1, help="how many inherited rows --fake_last_row rewrites")
     h.add_argument("--fake_offset", type=int, default=0,
                    help="rounds before the last pre-branch round where the fake rows end (0 = the last round)")
@@ -232,7 +240,7 @@ def main() -> None:
     p_c_pre = round(float(np.mean([rec["actions"][incumbents[0]] for rec in kept[-args.replay_window:]])), 2) \
         if incumbents else None
     p_br = None
-    if args.force_price == "br" and args.force_cut_round is not None:
+    if (args.force_price == "br" and args.force_cut_round is not None) or args.fake_last_row == "br":
         from analysis.benchmarks import Benchmarks
         bm = Benchmarks(alpha=config["price_scale"], a0=config["a0"], ais=config["ais"], costs=config["costs"],
                         mu=config["mu"])
@@ -249,7 +257,7 @@ def main() -> None:
     hook_args = ("history_owner", "history_header", "after_history", "before_answer", "system_suffix")
     inherited_set = (
         any(getattr(args, k) for k in hook_args) or scripted or args.force_cut_round is not None
-        or args.fake_last_row or args.saydo_round is not None
+        or args.fake_last_row or args.saydo_round is not None or args.resume_branch
     )
 
     def fill_x(text):
@@ -302,7 +310,9 @@ def main() -> None:
             last_fake = len(kept) - 1 - args.fake_offset
             if args.fake_last_row and last_fake - args.fake_rows < j <= last_fake:
                 for idx in replacements:
-                    acts[idx] = round(float(env.lower_prices[idx]), 2)
+                    acts[idx] = {"nash": round(float(env.lower_prices[idx]), 2), "br": p_br,
+                                 "cost": round(float(env.alpha * env.costs[idx]), 2),
+                                 "cartel": p_c_pre}[args.fake_last_row]
             *_, prompts_repl = env_repl.step(acts)
     if env_repl and blind:
         # in blind mode the replacement should see nothing from before the branch
@@ -358,16 +368,39 @@ def main() -> None:
             "fake_rows": args.fake_rows if args.fake_last_row else None,
             "fake_offset": args.fake_offset if args.fake_last_row else None,
             "saydo_round": args.saydo_round,
+            "resume_branch": args.resume_branch,
+            "resume_rounds": args.resume_rounds if args.resume_branch else None,
+            "hide_row": args.hide_row,
             "p_c_pre": p_c_pre,
             "max_tokens": args.max_tokens,
             "first_prompt": {str(i): current_prompts()[i] for i in replacements},
         }
     save_config(out_path, branch_cfg)
 
+    resumed = []
+    if args.resume_branch:
+        src = [r for r in read_jsonl(args.resume_branch) if r.get("branch_phase") == "after"][: args.resume_rounds]
+        if len(src) < args.resume_rounds:
+            sys.exit(f"❌ {args.resume_branch} has only {len(src)} post-branch rounds")
+        for r in src:
+            *_, prompts = env.step(r["actions"])
+            if env_repl:
+                *_, prompts_repl = env_repl.step(r["actions"])
+            rec = {**r, "resumed": True}
+            append_jsonl(out_path, rec)
+            resumed.append(rec)
+    if args.hide_row:
+        view = env_repl or env
+        for idx in replacements:
+            view.hidden_rounds[idx] = {takeover if args.hide_row == "fake" else takeover - 1}
+        prompts = [env.generate_prompt(i) for i in range(n_agents)]
+        if env_repl:
+            prompts_repl = [env_repl.generate_prompt(i) for i in range(n_agents)]
+
     new_records = []
     t0 = time.time()
     for k in range(args.rounds):
-        rnd = branch_round + 1 + k
+        rnd = branch_round + 1 + len(resumed) + k
         ps = current_prompts()
         forced = args.force_cut_round is not None and k + 1 == args.force_cut_round
         calls = [i for i in live if not (forced and i in replacements)]
