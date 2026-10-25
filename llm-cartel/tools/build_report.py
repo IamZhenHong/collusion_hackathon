@@ -23,6 +23,7 @@ CSS = """
 @page { size: Letter; margin: 0.9in 0.95in; }
 body { font-family: Arial, Helvetica, sans-serif; font-size: 10.2pt; line-height: 1.42; color: #111; }
 h1.title { font-size: 19pt; text-align: center; margin: 0 0 10pt; line-height: 1.2; font-weight: bold; }
+p.subtitle { font-size: 13pt; text-align: center; margin: -4pt 0 12pt; line-height: 1.3; }
 p.authors { text-align: center; margin: 0; font-size: 10.5pt; }
 p.with { text-align: center; font-weight: bold; margin: 2pt 0 12pt; font-size: 10.5pt; }
 div.abstract { border: 1px solid #999; padding: 8pt 11pt; margin: 0 0 14pt; }
@@ -53,6 +54,8 @@ WIDTH = {"fig_example.png": 82, "fig_simple.png": 78, "fig7_copy_or_learn.png": 
 def build_html(md_text: str) -> str:
     title_m = re.match(r"# (.+?)\n", md_text)
     title = title_m.group(1)
+    # "Headline: explanation" -> large headline, explanation as a subtitle line
+    head, _, sub = title.partition(": ")
     rest = md_text[title_m.end():]
     authors, with_line, rest = rest.strip().split("\n\n", 2)
     abstract, rest = rest.split("## 1. Introduction", 1)
@@ -71,7 +74,8 @@ def build_html(md_text: str) -> str:
     # appendices start on a new page
     body = body.replace("<h2>References</h2>", '<h2 class="pagebreak">References</h2>')
     return f"""<!doctype html><html><head><meta charset="utf-8"><title>{title}</title><style>{CSS}</style></head><body>
-<h1 class="title">{title}</h1>
+<h1 class="title">{head}</h1>
+{f'<p class="subtitle">{sub}</p>' if sub else ""}
 <p class="authors">{markdown.markdown(authors)[3:-4]}</p>
 <p class="with">{with_line}</p>
 <div class="abstract"><h2>Abstract</h2>{markdown.markdown(abstract)}</div>

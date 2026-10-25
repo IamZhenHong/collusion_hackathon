@@ -1,4 +1,4 @@
-# Inherited Collusion: Replacing a Colluding Pricing Agent Keeps Prices High; One Profitable Row in Its Own History Lowers Them
+# New AI, Same High Prices: Replacing an Overcharging AI Pricing Agent Doesn't Fix It, but One Past Example of a Cheaper Price Earning More Can
 
 Zhen Hong Seng — [Affiliation]
 
