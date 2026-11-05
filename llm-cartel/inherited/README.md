@@ -3,7 +3,7 @@
 Does replacing a colluding LLM pricing agent restore competition? Built on the `llm-cartel` harness
 (Riemer et al.) in this fork of `poseidon-research/collusion_hackathon`.
 
-- **Write-up:** [REPORT.md](REPORT.md) (draft)
+- **Write-up:** [report PDF](report_build/Inherited_Collusion_report.pdf), [REPORT.md](REPORT.md)
 - **Pre-registration:** [PREREG.md](PREREG.md); tags `ic-prereg-v1`, `ic-prereg-addendum1`, `ic-prereg-addendum2`
   mark the commits made before each batch ran.
 - **Results:** `../results/analysis/<set>/contrasts.md` (decision rules), `../results/analysis/figures/`,

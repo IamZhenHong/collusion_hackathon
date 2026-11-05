@@ -1,6 +1,6 @@
 # Inherited Collusion: Replacing an Overcharging AI Pricing Agent Doesn't Fix It, but One Past Example of a Cheaper Price Earning More Can
 
-Zhen Hong Seng — [Affiliation]
+Zhen Hong Seng — Independent researcher
 
 With Apart Research
 

@@ -1,4 +1,49 @@
-# Hackathon NY starter repo
+# Inherited Collusion: Replacing an Overcharging AI Pricing Agent Doesn't Fix It, but One Past Example of a Cheaper Price Earning More Can
+
+**Zhen Hong Seng** · Apart Research AI Collusion Sprint, 23-25 October 2026
+
+**[Report (PDF)](llm-cartel/inherited/report_build/Inherited_Collusion_report.pdf)** ·
+[Report (Markdown)](llm-cartel/inherited/REPORT.md) ·
+[Pre-registration](llm-cartel/inherited/PREREG.md) ·
+[Code and how to reproduce](llm-cartel/inherited/) ·
+[Results and figures](llm-cartel/results/analysis/)
+
+## Abstract
+
+If an AI pricing agent is caught overcharging, the obvious remedy is to replace it. We test whether that
+restores competition. In a simulated two-firm market, two gpt-4.1-mini agents first settle on a high shared
+price; one is then replaced by a fresh agent that is never told to collude and inherits its firm's price
+history, while the other firm keeps its price and cannot punish undercutting. Across 20 histories and three
+newcomer models, the newcomer kept most of the overcharge above its best response to the incumbent's price:
+gpt-4.1-mini 73%, Qwen3-14B 97%, Claude Haiku 5.5 89%. A newcomer with no history kept the price high too,
+copying its competitor, so the record is not what sustains the price. Pre-registered levers mostly failed:
+relabelling the history as a predecessor's, messages from "management", and instructions to compete barely
+moved prices. What worked was one row in the newcomer's own history showing a lower price that earned more,
+whether real or inserted: it removed the overcharge for gpt-4.1-mini, halved it for Qwen3-14B and cut it by
+a sixth to a quarter for Haiku. A sham round and a zero-profit row did nothing; the competitor's low price
+did far less. For gpt-4.1-mini the change held against a live competitor that never retaliated, lasted 80
+rounds and survived deleting the row. At a fixed price, the sales and profit a row reported decided whether
+gpt-4.1-mini adopted it. A high-price row showing high profit raised prices, so inherited records are an
+attack surface.
+
+![Share of the cartel overcharge the new AI keeps, by condition](llm-cartel/results/analysis/figures/fig_simple.png)
+
+## What is in this repository
+
+This is a fork of the sprint's starter repo
+([poseidon-research/collusion_hackathon](https://github.com/poseidon-research/collusion_hackathon)). The
+project lives in [`llm-cartel/`](llm-cartel/), built on the organisers' `llm-cartel` harness (Riemer et al.):
+
+- [`llm-cartel/inherited/`](llm-cartel/inherited/): the report, pre-registration, experiment arms and runner,
+  with a list of every change made to the harness and the commands to reproduce the results.
+- [`llm-cartel/results/`](llm-cartel/results/): all base runs, 2,960 branch files, decision tables and figures.
+
+Everything on this branch was written during the sprint. The rest of the repository is the organisers'
+starter code; its original README follows.
+
+---
+
+# Hackathon NY starter repo (original README)
 
 Ten research codebases on LLM agents, collusion and multi-agent coordination, bundled so a
 team can clone once and start hacking. Every project runs on a normal laptop with **no GPU**,
